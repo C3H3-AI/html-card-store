@@ -329,23 +329,29 @@
 
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
 .modal { background: var(--card-background-color); border-radius: 16px; max-width: 800px; width: 100%; max-height: 90vh; overflow: hidden; resize: both; min-width: 400px; min-height: 300px; transition: all 0.2s ease; display: flex; flex-direction: column; }
+.modal .modal-body { flex: 1; overflow: hidden; display: flex; min-height: 0; }
 .modal.maximized { border-radius: 0; resize: none; }
 .modal.maximized .modal-body { flex: 1; overflow: hidden; display: flex; min-height: 0; }
 .modal.maximized .collapse-body.expanded { max-height: 1000px; }
 .modal.maximized .import-preview-panel,
 .modal.maximized .detail-preview-panel { width: 50%; }
 /* Prism 代码高亮跟随 HA 主题 */
-.pce-container .prism-code-editor, .pce-fallback { background: var(--card-background-color); color: var(--primary-text-color); }
-.pce-container .token.tag { color: var(--primary-color); }
-.pce-container .token.attr-name { color: #9cdcfe; }
-.pce-container .token.attr-value, .pce-container .token.string { color: #ce9178; }
-.pce-container .token.comment { color: var(--secondary-text-color); font-style: italic; }
-.pce-container .token.punctuation { color: var(--secondary-text-color); }
-.pce-container .token.keyword { color: #c586c0; }
-.pce-container .token.operator { color: #d4d4d4; }
-.pce-container .token.number { color: #b5cea8; }
-.pce-container .token.boolean { color: #569cd6; }
-.pce-container .token.function { color: #dcdcaa; }
+.pce-container .prism-code-editor, .pce-fallback,
+.modal-body .prism-code-editor, .modal-body .pce-fallback { 
+  background: var(--card-background-color); 
+  color: var(--primary-text-color); 
+}
+.pce-container .token.tag, .modal-body .token.tag { color: var(--primary-color); }
+.pce-container .token.attr-name, .modal-body .token.attr-name { color: #9cdcfe; }
+.pce-container .token.attr-value, .pce-container .token.string,
+.modal-body .token.attr-value, .modal-body .token.string { color: #ce9178; }
+.pce-container .token.comment, .modal-body .token.comment { color: var(--secondary-text-color); font-style: italic; }
+.pce-container .token.punctuation, .modal-body .token.punctuation { color: var(--secondary-text-color); }
+.pce-container .token.keyword, .modal-body .token.keyword { color: #c586c0; }
+.pce-container .token.operator, .modal-body .token.operator { color: #d4d4d4; }
+.pce-container .token.number, .modal-body .token.number { color: #b5cea8; }
+.pce-container .token.boolean, .modal-body .token.boolean { color: #569cd6; }
+.pce-container .token.function, .modal-body .token.function { color: #dcdcaa; }
 .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--divider-color); }
 .modal-header-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .modal-title { font-size: 18px; font-weight: 700; color: var(--primary-text-color); margin: 0; }
@@ -1185,10 +1191,10 @@ input:checked + .switch-slider + .switch-knob { transform: translateX(20px); }
           };
         });
 
-        var fhtml = '<div style="display:flex;gap:16px;flex:1;min-height:0;">';
+        var fhtml = '<div style="display:flex;gap:16px;height:100%;">';
 
         // 左侧面板（独立滚动）
-        fhtml += '<div style="flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;min-height:0;">';
+        fhtml += '<div style="flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;">';
         fhtml += '<div style="overflow-y:auto;flex:1;padding:20px 10px 20px 0;">';
         fhtml += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:14px 16px;background:rgba(0,0,0,0.015);border-radius:12px;border:1px solid var(--divider-color);">';
         fhtml += '<svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="var(--primary-color)" opacity="0.1"/><path d="M14 26L10 20l4-6m12 12l4-6-4-6m-7-2l-4 12" stroke="var(--primary-color)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -1203,17 +1209,18 @@ input:checked + .switch-slider + .switch-knob { transform: translateX(20px); }
         fhtml += '<span style="font-size:10px;padding:2px 8px;background:var(--primary-color);color:#fff;border-radius:6px;font-weight:500;">HTML+CSS</span>';
         if (mod.tags) mod.tags.forEach(function(t) { fhtml += '<span style="font-size:10px;padding:2px 8px;background:rgba(var(--rgb-primary-color),0.1);color:var(--primary-color);border-radius:6px;">' + t + '</span>'; });
         fhtml += '</div></div></div>';
-        // 折叠面板1：HTML 内容（代码编辑器）
+        // 折叠面板1：HTML 内容（默认折叠）
         fhtml += '<div class="collapse-panel">';
-        fhtml += '<div class="collapse-header expanded" id="' + modalId + '_toggleCode">';
+        fhtml += '<div class="collapse-header" id="' + modalId + '_toggleCode">';
         fhtml += '<div class="collapse-header-left">';
         fhtml += '<svg class="collapse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>';
         fhtml += '<span class="collapse-title">HTML ' + _t('codeLabel') + '</span></div>';
-        fhtml += '<button class="btn" id="' + modalId + '_expandCode" style="padding:4px 10px;font-size:11px;min-width:0;margin-right:6px;" title="' + _t('expandCode') + '">🔍 ' + _t('expandCode') + '</button>';
-        fhtml += '<span class="collapse-arrow expanded"></span></div>';
-        fhtml += '<div class="collapse-body expanded" id="' + modalId + '_bodyCode">';
+        fhtml += '<button class="btn primary" id="' + modalId + '_expandCode" style="padding:4px 10px;font-size:11px;min-width:0;margin-right:6px;" title="' + _t('expandCode') + '">✏️ ' + _t('expandCode') + '</button>';
+        fhtml += '<span class="collapse-arrow"></span></div>';
+        fhtml += '<div class="collapse-body" id="' + modalId + '_bodyCode">';
         fhtml += '<div class="collapse-content">';
-        fhtml += '<textarea class="form-textarea" id="' + modalId + '_code" style="min-height:200px;font-size:12px;font-family:Consolas,monospace;">' + escapeHtml(code) + '</textarea>';
+        fhtml += '<div id="' + modalId + '_codePreview" style="min-height:150px;font-size:12px;font-family:Consolas,monospace;padding:12px;border:1px solid var(--divider-color);border-radius:8px;white-space:pre-wrap;word-break:break-all;color:var(--primary-text-color);background:var(--card-background-color);overflow-x:auto;"></div>';
+        fhtml += '<textarea id="' + modalId + '_code" style="display:none;">' + escapeHtml(code) + '</textarea>';
         fhtml += '<div style="margin-top:10px;display:flex;gap:8px;">';
         fhtml += '<button class="btn" id="' + modalId + '_save" style="flex:1;justify-content:center;">' + _t('saveToCustom') + '</button>';
         fhtml += '<button class="btn" id="' + modalId + '_copyCode" style="flex:0.5;justify-content:center;">' + _t('btnCopy') + '</button>';
@@ -1299,8 +1306,11 @@ input:checked + .switch-slider + .switch-knob { transform: translateX(20px); }
           previewFrame.srcdoc = '<html><head><style>body{margin:0;padding:16px;font-family:Roboto,sans-serif;background:#fff;color:#333;}</style></head><body>' + code + '</body></html>';
         }
 
-        // 延迟升级代码编辑器，避免影响 iframe 渲染
-        setTimeout(function() { upgradeToCodeEditor(modalId + '_code'); }, 200);
+        // 设置代码预览（只读）
+        var codePreview = document.getElementById(modalId + '_codePreview');
+        if (codePreview) {
+          codePreview.textContent = code;
+        }
 
         var expandBtn = document.getElementById(modalId + '_expandPreview');
         var previewFrame = document.getElementById(modalId + '_preview');
@@ -1652,7 +1662,7 @@ input:checked + .switch-slider + .switch-knob { transform: translateX(20px); }
     var html = '<div class="modal-overlay"><div class="modal" style="max-width:900px;">';
     html += '<div class="modal-header"><div class="modal-header-left"><h2 class="modal-title">' + (mod.name || "") + '</h2></div><div class="modal-header-actions"><button class="modal-maximize" onclick="toggleModalSize(this)"><svg><use href="#ico-maximize"/></svg></button>';
     html += '<button class="modal-close" id="closeBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></div>';
-    html += '<div class="modal-body"><div style="display:flex;gap:16px;flex:1;min-height:0;">';
+    html += '<div class="modal-body"><div style="display:flex;gap:16px;">';
     html += '<div style="flex:1;min-width:0;display:flex;flex-direction:column;">';
     if (mod.image) html += '<img class="modal-img" src="' + mod.image + '"/>';
     html += '<div class="modal-meta">';

@@ -15,7 +15,7 @@ from homeassistant.components.lovelace.dashboard import LovelaceStorage
 
 from .const import DOMAIN
 
-__version__ = "2.3.2"
+__version__ = "1.0"
 
 STORE_VIEW_TITLE = "商店"
 _LOGGER = logging.getLogger(__name__)
