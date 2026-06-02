@@ -1,0 +1,17 @@
+{
+  "config": {
+    "abort": {
+      "single_instance_allowed": "Only one HTML Card Store instance is allowed"
+    },
+    "step": {
+      "user": {
+        "title": "HTML Card Store",
+        "description": "Creates a \"Html Pro Card Store\" panel in the sidebar for browsing, collecting and importing html-pro-card modules.",
+        "data": {
+          "title": "Sidebar name",
+          "url_path": "URL path"
+        }
+      }
+    }
+  }
+}

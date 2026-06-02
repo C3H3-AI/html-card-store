@@ -1,0 +1,2093 @@
+<!-- v2.3.2 -->
+<script>
+(function() {
+  // ===== I18N: Language detection + translations =====
+  var _LANG = 'zh';
+  try {
+    var _top = window.top || window.parent;
+    var _haEl = _top.document.querySelector('home-assistant');
+    if (_haEl && _haEl.hass && _haEl.hass.language) {
+      _LANG = _haEl.hass.language.indexOf('zh') === 0 ? 'zh' : 'en';
+    } else {
+      var _dl = _top.document.documentElement.lang || '';
+      _LANG = _dl.indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  } catch(e) {}
+
+  var T = {
+    storeTitle: {zh:'HTML Pro Card 模块商店',en:'HTML Pro Card Module Store'},
+    storeSubtitle: {zh:'浏览、收藏和导入精美的仪表盘卡片',en:'Browse, collect and import beautiful dashboard cards'},
+    searchPlaceholder: {zh:'搜索模块...',en:'Search modules...'},
+    sortName: {zh:'按名称',en:'By Name'}, sortDate: {zh:'按时间',en:'By Date'}, sortAuthor: {zh:'按作者',en:'By Author'},
+    newBtn: {zh:'新建',en:'New'}, scanBtn: {zh:'扫描',en:'Scan'}, refreshBtn: {zh:'刷新',en:'Refresh'},
+    installHpc: {zh:'安装HPC',en:'Install HPC'}, installHpcTitle: {zh:'一键安装 html-pro-card 资源',en:'One-click install html-pro-card'},
+    tabAll: {zh:'全部',en:'All'}, tabFavs: {zh:'⭐ 收藏',en:'⭐ Favorites'},
+    tabRecent: {zh:'⏰ 最近',en:'⏰ Recent'}, tabCustom: {zh:'📝 自建',en:'📝 Custom'},
+    statStore: {zh:'商店',en:'Store'}, statCustom: {zh:'自建',en:'Custom'}, statFav: {zh:'收藏',en:'Fav'},
+    emptyFav: {zh:'暂无收藏',en:'No favorites yet'}, emptyRecent: {zh:'暂无最近使用',en:'No recent items'},
+    emptyCustom: {zh:'点击 +新建 创建自建模块',en:'Click +New to create a custom module'}, emptyNone: {zh:'没有模块',en:'No modules'},
+    unknownName: {zh:'未命名',en:'Untitled'}, badgeRecent: {zh:'最近',en:'Recent'}, badgeCustom: {zh:'自建',en:'Custom'},
+    authorMe: {zh:'我',en:'Me'}, authorUnknown: {zh:'未知',en:'Unknown'},
+    btnEdit: {zh:'编辑',en:'Edit'}, btnInstall: {zh:'安装',en:'Install'}, btnCopy: {zh:'复制',en:'Copy'}, btnSource: {zh:'源码',en:'Source'},
+    copied: {zh:'代码已复制!',en:'Code copied!'},
+    copyFail: {zh:'无法自动复制（iframe限制），请手动复制',en:'Cannot auto-copy (iframe restriction), copy manually'},
+    unfavorited: {zh:'已取消收藏',en:'Unfavorited'}, favorited: {zh:'已收藏 ⭐',en:'Favorited ⭐'},
+    importTitle: {zh:'安装',en:'Install'}, loading: {zh:'加载中...',en:'Loading...'},
+    loadingContent: {zh:'加载模块内容...',en:'Loading module content...'},
+    noCode: {zh:'无法获取卡片代码',en:'Failed to get card code'}, noDashboards: {zh:'未找到仪表盘',en:'No dashboards found'},
+    unnamed: {zh:'未命名',en:'Unnamed'}, codeLabel: {zh:'编辑代码（修改后将自动应用到导入）',en:'Edit code (changes apply on import)'},
+    saveToCustom: {zh:'💾 保存到自建模块',en:'💾 Save to custom'}, selectDash: {zh:'选择仪表盘',en:'Select dashboard'},
+    selectView: {zh:'选择视图（页面）',en:'Select view'}, cardName: {zh:'卡片名称',en:'Card name'},
+    cancel: {zh:'取消',en:'Cancel'}, confirmInstall: {zh:'📥 确认导入',en:'📥 Confirm install'},
+    previewLabel: {zh:'👁 卡片效果预览',en:'👁 Card preview'}, editCode: {zh:'编辑代码',en:'Edit code'},
+    saveChanges: {zh:'💾 保存修改',en:'💾 Save changes'}, favOn: {zh:'⭐ 已收藏',en:'⭐ Favorited'}, favOff: {zh:'☆ 收藏',en:'☆ Favorite'},
+    installToDash: {zh:'安装到仪表盘',en:'Install to dashboard'}, viewSource: {zh:'查看源码',en:'View source'},
+    scanTitle: {zh:'扫描安装现有卡片',en:'Scan existing cards'}, scanDesc: {zh:'选择要扫描的仪表盘：',en:'Select dashboards to scan:'},
+    selectAll: {zh:'全选',en:'Select all'}, scanStart: {zh:'扫描选中仪表盘',en:'Scan selected'},
+    scanning: {zh:'扫描中...',en:'Scanning...'}, scanImport: {zh:'导入',en:'Import'},
+    saving: {zh:'已保存',en:'Saved'}, importFailed: {zh:'保存失败',en:'Save failed'},
+    allTag: {zh:'全部',en:'All'}, checkingHPC: {zh:'正在检查...',en:'Checking...'},
+    hpcInstalled: {zh:'已安装，无需重复',en:'Already installed'}, downloading: {zh:'正在下载...',en:'Downloading...'},
+    registering: {zh:'已下载，注册资源...',en:'Downloaded, registering...'},
+    hpcSuccess: {zh:'✅ 安装成功！刷新后生效',en:'✅ Installed! Refresh to activate'},
+    hpcFailed: {zh:'安装失败',en:'Install failed'}, checkFailed: {zh:'检查资源状态失败',en:'Check failed'},
+    expand: {zh:'⛶ 放大',en:'⛶ Expand'}, collapse: {zh:'✕ 缩小',en:'✕ Collapse'},
+    codeEmpty: {zh:'代码不能为空',en:'Code cannot be empty'}, savedToCustom: {zh:'已保存到自建模块',en:'Saved to custom module'},
+    newTitle: {zh:'新建自建模块',en:'New custom module'}, modName: {zh:'模块名称',en:'Module name'},
+    modNamePH: {zh:'例如：我的精美卡片',en:'e.g. My card'}, modDesc: {zh:'描述',en:'Description'},
+    modDescPH: {zh:'简单描述一下',en:'Brief description'}, modTags: {zh:'标签（逗号分隔）',en:'Tags (comma sep)'},
+    modTagsPH: {zh:'例如：dashboard, light',en:'e.g. dashboard, light'}, modImage: {zh:'预览图片URL',en:'Preview image URL'},
+    modCode: {zh:'模块代码',en:'Module code'}, modCodePH: {zh:'粘贴你的 html-pro-card 代码',en:'Paste html-pro-card code'},
+    save: {zh:'保存',en:'Save'}, selectView: {zh:'选择视图（页面）',en:'Select view'},
+    selectDashFirst: {zh:'请选择仪表盘',en:'Select a dashboard first'}, selectViewFirst: {zh:'请选择视图',en:'Select a view first'},
+    configFailed: {zh:'获取仪表盘配置失败',en:'Failed to get dashboard config'},
+    importedTo: {zh:'已安装到',en:'Installed to'}, loadingViews: {zh:'加载中...',en:'Loading...'},
+    noViews: {zh:'无视图',en:'No views'}, loadFailed: {zh:'加载失败',en:'Load failed'},
+    scanNone: {zh:'未找到 html-pro-card 卡片',en:'No html-pro-card found'},
+    scanDone: {zh:'扫描完成，找到',en:'Found'}, scanCard: {zh:'卡片',en:'card(s)'},
+    batchImport: {zh:'批量导入',en:'Batch import'},
+    batchImported: {zh:'批量导入完成',en:'Batch import done'},
+    selectCardFirst: {zh:'请先选择卡片',en:'Select card(s) first'},
+    expandCode: {zh:'展开编辑',en:'Expand editor'},
+    showCode: {zh:'显示代码',en:'Show code'},
+    hideCode: {zh:'隐藏代码',en:'Hide code'},
+    codeChangedApply: {zh:'编辑代码（修改后将自动应用到安装）',en:'Edit code (changes apply on import)'},
+    preview: {zh:'👁 卡片效果预览',en:'👁 Card preview'},
+    options: {zh:'选项',en:'Options'},
+    disableParse: {zh:'Pure HTML Mode',en:'Pure HTML Mode'},
+    disableParseDesc: {zh:'直接渲染 HTML，不解析 YAML 格式',en:'Render HTML directly without YAML parsing'},
+    ignoreLineBreaks: {zh:'Ignore Line Breaks',en:'Ignore Line Breaks'},
+    ignoreLineBreaksDesc: {zh:'忽略 HTML 中的换行符',en:'Ignore line breaks in HTML'},
+    updateInterval: {zh:'刷新间隔(ms)',en:'Auto refresh (ms)'}, intervalDesc: {zh:'0=不刷新',en:'0=disabled'},
+    extScripts: {zh:'外部脚本',en:'External Scripts'}, addScript: {zh:'添加',en:'Add'},
+    scriptHint: {zh:'提示：需要 GSAP 等动画库时，在此添加 CDN 链接。例如: https://cdn.jsdelivr.net/npm/gsap@3.12/dist/gsap.min.js',en:'Tip: Add CDN URLs for external JS libraries like GSAP. e.g. https://cdn.jsdelivr.net/npm/gsap@3.12/dist/gsap.min.js'},
+    tabConfig: {zh:'配置',en:'Config'},
+    tabVisibility: {zh:'可见性',en:'Visibility'},
+    visibilityDesc: {zh:'当以下所有条件都满足时，显示此卡片。如果未设置任何条件，此卡片将始终显示。',en:'Show card when all conditions are met. If no conditions, card is always shown.'},
+    visPlaceholder: {zh:'例如:\n  - condition: state\n    entity: light.kitchen\n    state: "on"',en:'Example:\n  - condition: state\n    entity: light.kitchen\n    state: "on"'}
+  };
+
+  window._t = function(key) {
+    var entry = T[key];
+    return entry ? (entry[_LANG] || entry.zh) : key;
+  };
+
+  window._applyLang = function() {
+    var els = document.querySelectorAll('[data-i18n]');
+    for (var i = 0; i < els.length; i++) {
+      var key = els[i].getAttribute('data-i18n');
+      var text = _t(key);
+      if (els[i].tagName === 'INPUT' || els[i].tagName === 'TEXTAREA') {
+        els[i].setAttribute('placeholder', text);
+      } else if (els[i].tagName === 'OPTION') {
+        els[i].textContent = text;
+      } else {
+        els[i].childNodes[0] && els[i].childNodes[0].nodeType === 3 ? els[i].childNodes[0].textContent = text : els[i].textContent = text;
+      }
+    }
+  }
+  function detectDarkMode() {
+    try {
+      var p = window.top;
+      if (p) {
+        var cs = p.getComputedStyle(p.document.documentElement);
+        var bg = cs.getPropertyValue('--primary-background-color').trim();
+        if (bg && (bg.indexOf('#111') >= 0 || bg.indexOf('#1c1c') >= 0 || bg.indexOf('17,17') >= 0 || bg.indexOf('rgb(17') >= 0)) return true;
+      }
+    } catch(e) {}
+    try { return window.matchMedia('(prefers-color-scheme: dark)').matches; } catch(e) {}
+    return false;
+  }
+
+  var _themeSources = null;
+
+  function getParentRoots() {
+    var p = window.top;
+    if (!p || p === window) return [];
+    var sources = [];
+    try {
+      var haEl = p.document.querySelector('home-assistant');
+      if (haEl) {
+        if (haEl.shadowRoot) sources.push(haEl.shadowRoot);
+        var haApp = haEl.shadowRoot && haEl.shadowRoot.querySelector('ha-app');
+        if (haApp && haApp.shadowRoot) sources.push(haApp.shadowRoot);
+      }
+    } catch(e) {}
+    sources.push(p.document.documentElement);
+    sources.push(p.document.body);
+    return sources;
+  }
+
+  function readHAVar(name) {
+    var p = window.top;
+    if (!p || p === window) return '';
+    try {
+      if (!_themeSources) _themeSources = getParentRoots();
+      for (var i = 0; i < _themeSources.length; i++) {
+        try {
+          var cs = p.getComputedStyle(_themeSources[i]);
+          var v = cs.getPropertyValue(name).trim();
+          if (v) return v;
+        } catch(e) { continue; }
+      }
+    } catch(e) {}
+    return '';
+  }
+
+  function hexToRgb(hex) {
+    hex = hex.replace(/^#/, '');
+    if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+    if (hex.length !== 6) return '';
+    var r = parseInt(hex.substring(0,2), 16);
+    var g = parseInt(hex.substring(2,4), 16);
+    var b = parseInt(hex.substring(4,6), 16);
+    if (isNaN(r+g+b)) return '';
+    return r + ', ' + g + ', ' + b;
+  }
+
+  function applyTheme() {
+    _themeSources = null;
+    var p = window.top;
+    if (!p || p === window) return;
+    var root = document.documentElement;
+    var isDark = detectDarkMode();
+
+    var vars = {
+      '--primary-background-color': isDark ? '#111111' : '#f5f5f5',
+      '--secondary-background-color': isDark ? '#1c1c1c' : '#e0e0e0',
+      '--primary-text-color': isDark ? '#e1e1e1' : '#212121',
+      '--secondary-text-color': isDark ? '#9e9e9e' : '#727272',
+      '--card-background-color': isDark ? '#1c1c1c' : '#ffffff',
+      '--divider-color': isDark ? '#333333' : '#e0e0e0',
+      '--primary-color': '#03a9f4',
+      '--ha-card-border-radius': '12px',
+      '--app-header-background-color': isDark ? '#1c1c1c' : '#455a64',
+      '--sidebar-background-color': isDark ? '#111111' : '#fafafa',
+      '--primary-font-family': 'Roboto, sans-serif',
+      '--mdc-icon-size': '24px',
+      '--error-color': '#db4437',
+      '--warning-color': '#ff8f00',
+      '--success-color': '#0f9d58',
+      '--accent-color': '#ff9800',
+      '--text-primary-color': '#ffffff',
+      '--markdown-code-background-color': isDark ? '#2d2d2d' : '#f0f0f0'
+    };
+
+    var primaryColor = '';
+
+    for (var name in vars) {
+      var val = readHAVar(name);
+      if (val) {
+        root.style.setProperty(name, val);
+        if (name === '--primary-color') primaryColor = val;
+      } else {
+        root.style.setProperty(name, vars[name]);
+        if (name === '--primary-color') primaryColor = vars[name];
+      }
+    }
+
+    var rgbVal = readHAVar('--rgb-primary-color');
+    if (!rgbVal && primaryColor) {
+      var computed = hexToRgb(primaryColor);
+      if (computed) {
+        root.style.setProperty('--rgb-primary-color', computed);
+        rgbVal = computed;
+      }
+    } else if (rgbVal) {
+      root.style.setProperty('--rgb-primary-color', rgbVal);
+    }
+
+    if (!rgbVal) {
+      root.style.setProperty('--rgb-primary-color', '3, 169, 244');
+    }
+
+    root.style.setProperty('--app-header-background-color',
+      readHAVar('--app-header-background-color') || primaryColor || '#455a64');
+  }
+
+  applyTheme();
+  setTimeout(applyTheme, 500);
+  setTimeout(applyTheme, 1500);
+  setTimeout(applyTheme, 3000);
+
+  (function watchTheme() {
+    try {
+      var p = window.top;
+      if (!p || p === window) return;
+      var target = p.document.querySelector('home-assistant') ||
+                   p.document.querySelector('ha-app') ||
+                   p.document.documentElement;
+      if (target) {
+        var obs = new MutationObserver(function() { setTimeout(applyTheme, 100); });
+        obs.observe(target, {attributes: true, attributeFilter: ['class', 'style'], subtree: true});
+      }
+    } catch(e) {}
+  })();
+})();
+</script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:host { display: block; }
+.store { padding: 16px; background: var(--primary-background-color, #f5f5f5); min-height: 100vh; }
+.header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding: 14px 20px; background: linear-gradient(135deg, rgba(var(--rgb-primary-color), 0.08) 0%, rgba(var(--rgb-primary-color), 0.03) 100%); border-radius: 16px; border: 1px solid var(--divider-color); }
+.header-left { display: flex; align-items: center; gap: 14px; }
+.logo { width: 44px; height: 44px; color: var(--primary-color); }
+.title-group h1 { font-size: 19px; font-weight: 700; color: var(--primary-text-color); margin: 0; }
+.title-group p { font-size: 12px; color: var(--secondary-text-color); margin: 4px 0 0; }
+.header-right { display: flex; gap: 24px; }
+.stat { text-align: center; }
+.stat-num { font-size: 20px; font-weight: 700; color: var(--primary-color); }
+.stat-label { font-size: 11px; color: var(--secondary-text-color); margin-top: 2px; text-transform: uppercase; }
+
+.sticky-header { position: sticky; top: 0; z-index: 100; background: var(--primary-background-color); margin: -16px -16px 12px; padding: 16px 16px 12px; }
+.controls { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.search { flex: 1; min-width: 120px; position: relative; }
+.search input { width: 100%; padding: 9px 12px 9px 38px; border: 1px solid var(--divider-color); border-radius: 10px; font-size: 14px; background: var(--card-background-color); color: var(--primary-text-color); outline: none; }
+.search input:focus { border-color: var(--primary-color); }
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--secondary-text-color); }
+
+.btn { padding: 8px 12px; border: 1px solid var(--divider-color); border-radius: 10px; background: var(--card-background-color); color: var(--primary-text-color); cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 13px; transition: all 0.25s; white-space: nowrap; }
+.btn:hover { border-color: var(--primary-color); color: var(--primary-color); }
+.btn svg { width: 18px; height: 18px; }
+.btn.primary { background: var(--primary-color); border-color: var(--primary-color); color: #fff; }
+.btn.primary:hover { opacity: 0.9; }
+.btn.danger { color: #f44336; border-color: #f44336; }
+.btn.danger:hover { background: #f44336; color: #fff; }
+
+.sort-select { padding: 8px 12px; border: 1px solid var(--divider-color); border-radius: 10px; background: var(--card-background-color); color: var(--primary-text-color); font-size: 13px; cursor: pointer; }
+
+.tabs-row { display: flex; align-items: center; gap: 12px; }
+.tabs { display: flex; gap: 6px; flex-shrink: 0; }
+.tab { padding: 7px 14px; border-radius: 8px; background: var(--card-background-color); border: 1px solid var(--divider-color); color: var(--secondary-text-color); cursor: pointer; font-size: 12px; transition: all 0.2s; white-space: nowrap; }
+.tab:hover { border-color: var(--primary-color); color: var(--primary-color); }
+.tab.active { background: var(--primary-color); border-color: var(--primary-color); color: #fff; }
+
+.tag-filters { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; justify-content: flex-end; }
+.tag { padding: 6px 12px; border: 1px solid var(--divider-color); border-radius: 18px; background: var(--card-background-color); color: var(--secondary-text-color); cursor: pointer; font-size: 12px; transition: all 0.25s; }
+.tag:hover { border-color: var(--primary-color); color: var(--primary-color); }
+.tag.active { background: var(--primary-color); border-color: var(--primary-color); color: #fff; }
+
+.modules { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.module-card { background: var(--card-background-color); border: 1px solid var(--divider-color); border-radius: 14px; overflow: hidden; transition: all 0.3s; position: relative; cursor: pointer; }
+.module-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+.module-card.is-favorite { border-color: #ff9800; background: #fffbf0; }
+.module-card.is-custom { border-color: #4caf50; }
+.img-container { position: relative; }
+.module-img { width: 100%; height: 160px; object-fit: cover; background: var(--secondary-background-color); }
+.placeholder { width: 100%; height: 160px; display: flex; align-items: center; justify-content: center; background: var(--secondary-background-color); }
+.placeholder svg { width: 44px; height: 44px; color: var(--secondary-text-color); opacity: 0.4; }
+.fav-btn { position: absolute; top: 10px; right: 10px; width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.9); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; z-index: 10; }
+.fav-btn:hover { background: #fff; transform: scale(1.1); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+.fav-btn svg { width: 20px; height: 20px; color: #ccc; fill: transparent; stroke: #ccc; transition: all 0.2s; }
+.fav-btn.is-favorite svg { fill: #ff9800; color: #ff9800; stroke: #ff9800; }
+.fav-btn.is-favorite { background: #fff; }
+.badge { position: absolute; top: 10px; left: 10px; padding: 4px 10px; background: rgba(0,0,0,0.6); color: #fff; border-radius: 6px; font-size: 10px; font-weight: 600; }
+.badge.custom { background: #4caf50; }
+.module-content { padding: 14px; }
+.module-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.module-title { font-size: 15px; font-weight: 600; color: var(--primary-text-color); flex: 1; }
+.module-version { font-size: 10px; padding: 3px 8px; background: rgba(var(--rgb-primary-color), 0.1); color: var(--primary-color); border-radius: 6px; }
+.module-desc { font-size: 12px; color: var(--secondary-text-color); margin: 0 0 12px; line-height: 1.5; }
+.module-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.module-author { font-size: 12px; color: var(--primary-color); }
+.module-tags { display: flex; gap: 5px; }
+.module-tag { font-size: 9px; padding: 2px 7px; background: rgba(var(--rgb-primary-color), 0.08); color: var(--primary-color); border-radius: 4px; text-transform: uppercase; }
+.module-actions { display: flex; gap: 8px; }
+.module-actions .action-btn { flex: 1; padding: 9px 10px; border-radius: 10px; font-size: 12px; }
+.module-actions .action-btn svg { width: 16px; height: 16px; }
+.module-actions .action-btn.primary { background: var(--primary-color); border-color: var(--primary-color); color: #fff; }
+
+.loading, .empty, .error { text-align: center; padding: 50px 20px; color: var(--secondary-text-color); }
+.spinner { width: 40px; height: 40px; border: 3px solid var(--divider-color); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.empty svg { width: 70px; height: 70px; margin-bottom: 20px; opacity: 0.3; }
+
+.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(120px); background: var(--primary-color); color: #fff; padding: 14px 26px; border-radius: 12px; font-size: 14px; font-weight: 500; z-index: 10000; opacity: 0; transition: all 0.35s; }
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.toast.success { background: #4caf50; }
+.toast.error { background: #f44336; }
+
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.modal { background: var(--card-background-color); border-radius: 16px; max-width: 800px; width: 100%; max-height: 90vh; overflow: hidden; resize: both; min-width: 400px; min-height: 300px; transition: all 0.2s ease; display: flex; flex-direction: column; }
+.modal.maximized { border-radius: 0; resize: none; }
+.modal.maximized .modal-body { flex: 1; overflow: hidden; display: flex; min-height: 0; }
+.modal.maximized .collapse-body.expanded { max-height: 1000px; }
+.modal.maximized .import-preview-panel,
+.modal.maximized .detail-preview-panel { width: 50%; }
+/* Prism 代码高亮跟随 HA 主题 */
+.pce-container .prism-code-editor, .pce-fallback { background: var(--card-background-color); color: var(--primary-text-color); }
+.pce-container .token.tag { color: var(--primary-color); }
+.pce-container .token.attr-name { color: #9cdcfe; }
+.pce-container .token.attr-value, .pce-container .token.string { color: #ce9178; }
+.pce-container .token.comment { color: var(--secondary-text-color); font-style: italic; }
+.pce-container .token.punctuation { color: var(--secondary-text-color); }
+.pce-container .token.keyword { color: #c586c0; }
+.pce-container .token.operator { color: #d4d4d4; }
+.pce-container .token.number { color: #b5cea8; }
+.pce-container .token.boolean { color: #569cd6; }
+.pce-container .token.function { color: #dcdcaa; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--divider-color); }
+.modal-header-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.modal-title { font-size: 18px; font-weight: 700; color: var(--primary-text-color); margin: 0; }
+.modal-header-actions { display: flex; align-items: center; gap: 6px; }
+.modal-maximize { width: 36px; height: 36px; border-radius: 50%; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.modal-maximize:hover { background: rgba(0,0,0,0.05); }
+.modal-maximize svg { width: 18px; height: 18px; color: var(--secondary-text-color); }
+.modal-close { width: 36px; height: 36px; border-radius: 50%; border: none; background: rgba(0,0,0,0.05); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.modal-close svg { width: 20px; height: 20px; color: var(--secondary-text-color); }
+.modal-body { padding: 0; overflow: hidden; flex: 1; display: flex; min-height: 0; }
+.modal-body .modal-body-inner { padding: 20px; overflow-y: auto; flex: 1; }
+#scanBody.modal-body { display: block; overflow-y: auto; }
+.modal-body ::-webkit-scrollbar { width: 6px; }
+.modal-body ::-webkit-scrollbar-track { background: transparent; }
+.modal-body ::-webkit-scrollbar-thumb { background: var(--divider-color); border-radius: 3px; }
+.modal-body ::-webkit-scrollbar-thumb:hover { background: var(--secondary-text-color); }
+.modal-img { width: 100%; border-radius: 12px; margin-bottom: 18px; }
+.modal-meta { display: flex; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+.modal-meta-item { padding: 6px 12px; background: rgba(var(--rgb-primary-color), 0.08); color: var(--primary-color); border-radius: 8px; font-size: 12px; }
+.modal-desc { font-size: 14px; color: var(--secondary-text-color); line-height: 1.7; margin-bottom: 18px; }
+.modal-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.modal-actions .btn { justify-content: center; }
+
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: 13px; font-weight: 600; color: var(--primary-text-color); margin-bottom: 6px; }
+.form-input, .form-textarea { width: 100%; padding: 11px 14px; border: 1px solid var(--divider-color); border-radius: 10px; background: var(--card-background-color); color: var(--primary-text-color); font-size: 14px; outline: none; }
+.form-input:focus, .form-textarea:focus { border-color: var(--primary-color); }
+.form-textarea { min-height: 200px; font-family: 'Consolas', monospace; resize: vertical; }
+
+.scan-card { background: var(--card-background-color); border: 1px solid var(--divider-color); border-radius: 12px; margin-bottom: 10px; cursor: pointer; overflow: hidden; transition: all 0.2s; }
+.scan-card:hover { border-color: var(--primary-color); }
+.scan-card .sc-content { padding: 14px 16px; }
+.scan-card .sc-name { font-size: 14px; font-weight: 600; color: var(--primary-text-color); }
+.scan-card .sc-path { font-size: 12px; color: var(--secondary-text-color); margin-top: 4px; }
+.scan-card .sc-badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 4px; margin-top: 6px; font-weight: 600; }
+.scan-card .sc-badge.html { background: rgba(var(--rgb-primary-color),0.1); color: var(--primary-color); }
+.scan-card .sc-badge.other { background: rgba(0,0,0,0.05); color: var(--secondary-text-color); }
+
+/* html-pro-card 风格折叠面板 */
+.collapse-panel {
+  border: 1px solid var(--divider-color, #e0e0e0);
+  border-radius: 10px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  background: var(--card-background-color, #fff);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+.collapse-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  cursor: pointer;
+  user-select: none;
+}
+.collapse-header:hover { background: rgba(0, 0, 0, 0.015); }
+.collapse-header.expanded { border-bottom: 1px solid var(--divider-color, #e0e0e0); }
+.collapse-header-left { display: flex; align-items: center; gap: 12px; }
+.collapse-icon { width: 20px; height: 20px; color: var(--secondary-text-color); flex-shrink: 0; }
+.collapse-header:hover .collapse-icon, .collapse-header.expanded .collapse-icon { color: var(--primary-color); }
+.collapse-title { font-size: 14px; font-weight: 600; color: var(--primary-text-color); letter-spacing: -0.2px; }
+.collapse-arrow {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--divider-color, #ddd);
+  transition: all 0.25s ease;
+  flex-shrink: 0;
+}
+.collapse-arrow.expanded {
+  background: var(--primary-color, #03a9f4);
+  box-shadow: 0 0 0 3px rgba(var(--rgb-primary-color), 0.15);
+}
+.collapse-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease;
+}
+.collapse-body.expanded {
+  max-height: 600px;
+}
+.collapse-content { padding: 16px 18px 18px; }
+.option-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  margin: 0 -16px;
+}
+.option-row:not(:last-child) { border-bottom: 1px solid var(--divider-color, #e0e0e0); }
+.option-label { font-size: 14px; font-weight: 500; color: var(--primary-text-color); }
+.option-desc { font-size: 12px; color: var(--secondary-text-color); margin-top: 4px; line-height: 1.4; }
+.panels-wrapper { background: rgba(0, 0, 0, 0.02); border-radius: 12px; padding: 12px; }
+
+/* CSS 开关样式 - 匹配 html-pro-card 的 ha-htmlcard-switch */
+.switch-slider { background: var(--divider-color) !important; }
+input:checked + .switch-slider { background: var(--primary-color) !important; }
+input:checked + .switch-slider + .switch-knob { transform: translateX(20px); }
+</style>
+
+<div class="store">
+  <div class="sticky-header">
+    <div class="header">
+      <div class="header-left">
+        <svg class="logo" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2V3H12V9H11V10H9V11H8V12H7V13H5V12H4V11H3V9H2V15H3V16H4V17H5V18H6V22H8V21H7V20H8V19H9V18H10V19H11V22H13V21H12V17H13V16H14V15H15V12H16V13H17V11H15V9H20V8H17V7H22V3H21V2M14 3H15V4H14Z"/></svg>
+        <div class="title-group">
+          <h1 data-i18n="storeTitle">HTML Pro Card 模块商店</h1>
+          <p data-i18n="storeSubtitle">浏览、收藏和导入精美的仪表盘卡片</p>
+        </div>
+      </div>
+      <div class="header-right" id="statsBar"></div>
+    </div>
+
+    <div class="controls">
+      <div class="search">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" id="searchInput" placeholder="搜索模块..." data-i18n="searchPlaceholder"/>
+      </div>
+      <select class="sort-select" id="sortSelect">
+        <option value="name" data-i18n="sortName">按名称</option>
+        <option value="date" data-i18n="sortDate">按时间</option>
+        <option value="author" data-i18n="sortAuthor">按作者</option>
+      </select>
+      <button class="btn primary" id="newModuleBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span data-i18n="newBtn">新建</span>
+      </button>
+      <button class="btn" id="scanBtn" title="扫描导入">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V5a2 2 0 012-2h2M3 17v2a2 2 0 002 2h2M17 3h2a2 2 0 012 2v2M17 21h2a2 2 0 002-2v-2"/></svg>
+        <span data-i18n="scanBtn">扫描</span>
+      </button>
+      <button class="btn" id="refreshBtn" title="刷新">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+      </button>
+      <button class="btn" id="installHpcBtn" title="一键安装 html-pro-card 资源">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        <span data-i18n="installHpc">安装HPC</span>
+      </button>
+    </div>
+
+    <div class="tabs-row">
+      <div class="tabs">
+        <button class="tab active" data-view="all" data-i18n="tabAll">全部</button>
+        <button class="tab" data-view="favorites"><span data-i18n="tabFavs">⭐ 收藏</span> (<span id="favCount">0</span>)</button>
+        <button class="tab" data-view="recent"><span data-i18n="tabRecent">⏰ 最近</span> (<span id="recentCount">0</span>)</button>
+        <button class="tab" data-view="custom"><span data-i18n="tabCustom">📝 自建</span> (<span id="customCount">0</span>)</button>
+      </div>
+      <div class="tag-filters" id="tagFilters"></div>
+    </div>
+  </div>
+
+  <div id="modulesContainer" class="modules"></div>
+</div>
+
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="ico-maximize" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+  </symbol>
+  <symbol id="ico-minimize" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
+  </symbol>
+</svg>
+<div id="scanModal" class="modal-overlay" style="display:none;">
+  <div class="modal" style="max-width: 900px;">
+    <div class="modal-header">
+      <h2 class="modal-title" data-i18n="scanTitle">扫描导入现有卡片</h2>
+      <div class="modal-header-actions">
+        <button class="modal-maximize" onclick="toggleModalSize(this)"><svg><use href="#ico-maximize"/></svg></button>
+        <button class="modal-close" id="closeScanBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button></div>
+    </div>
+    <div class="modal-body" id="scanBody">
+      <div class="loading"><div class="spinner"></div><div data-i18n="loading">加载中...</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<div id="modalContainer"></div>
+
+<script>
+(function() {
+  // 源优先级：GitHub raw（国内通常可访问）→ jsDelivr CDN → 本地文件
+  var GITHUB_RAW_BASE = "https://raw.githubusercontent.com/ha-china/html-card-pro/main/";
+  var CDN_BASE = "https://cdn.jsdelivr.net/gh/ha-china/html-card-pro@main/";
+  var LOCAL_BASE = "/local/html_card_store/";
+
+  // localStorage 缓存（类似 html-pro-card 的做法）
+  var STORE_CACHE_KEY = "hcs_store_cache";
+  var STORE_CACHE_TTL = 3600000; // 1小时
+
+  function fetchWithFallback(urls) {
+    function tryFetch(idx) {
+      if (idx >= urls.length) return Promise.reject(new Error("all sources failed"));
+      return fetch(urls[idx]).then(function(r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r;
+      }).catch(function(e) {
+        return tryFetch(idx + 1);
+      });
+    }
+    return tryFetch(0);
+  }
+
+  var _editors = {};
+
+  function upgradeToCodeEditor(id) {
+    var ta = document.getElementById(id);
+    if (!ta) return;
+    // iframe 内无法直接访问 ha-htmlcard-textarea，从父窗口获取
+    var ce = (typeof customElements !== 'undefined' && customElements.get('ha-htmlcard-textarea'))
+          || (window.top && window.top.customElements && window.top.customElements.get('ha-htmlcard-textarea'));
+    if (!ce) return;
+    var editor = window.top.document.createElement('ha-htmlcard-textarea');
+    editor.className = (ta.className || '') + ' ha-editor';
+    editor.style.width = '100%';
+    editor.style.minHeight = '200px';
+    editor.value = ta.value || '';
+    _editors[id] = editor;
+    editor.addEventListener('change', function(e) { ta.value = e.detail.value; });
+    ta.style.display = 'none';
+    ta.parentNode.insertBefore(editor, ta.nextSibling);
+  }
+
+  function toggleModalSize(btn) {
+    var modal = btn.closest('.modal');
+    var overlay = modal ? modal.closest('.modal-overlay') : null;
+    if (!modal) return;
+    var isMax = !modal.classList.contains('maximized');
+    modal.classList.toggle('maximized');
+    if (isMax) {
+      if (overlay) overlay.style.padding = '0';
+      modal.style.width = '100%';
+      modal.style.height = '100%';
+      modal.style.maxWidth = 'none';
+      modal.style.maxHeight = 'none';
+      modal.style.borderRadius = '0';
+      modal.style.minWidth = 'unset';
+      modal.style.minHeight = 'unset';
+    } else {
+      if (overlay) overlay.style.padding = '';
+      modal.style.width = '';
+      modal.style.height = '';
+      modal.style.maxWidth = '';
+      modal.style.maxHeight = '';
+      modal.style.borderRadius = '';
+      modal.style.minWidth = '';
+      modal.style.minHeight = '';
+    }
+    var ico = btn.querySelector('svg use');
+    if (ico) ico.setAttribute('href', isMax ? '#ico-minimize' : '#ico-maximize');
+  }
+
+  function getModUrls(filePath) {
+    if (filePath.indexOf("mods/") === 0) filePath = filePath.substring(5);
+    return [
+      CDN_BASE + "mods/" + filePath,
+      GITHUB_RAW_BASE + "mods/" + filePath
+    ];
+  }
+
+  function getStoreUrls() {
+    return [
+      CDN_BASE + "store.json",
+      GITHUB_RAW_BASE + "store.json"
+    ];
+  }
+  function getHass() {
+    var top = window.top || window.parent;
+    if (!top || top === window) return Promise.reject(new Error("no parent window"));
+
+    var tries = [];
+
+    // Method 1: top.hassConnection (standard HA promise)
+    if (top.hassConnection && top.hassConnection.then) {
+      tries.push("top.hassConnection");
+      return top.hassConnection.then(function(hass) {
+        if (!hass) throw new Error("hass is null");
+        return hass;
+      });
+    }
+
+    // Method 2: home-assistant element's hass property
+    try {
+      var haEl = top.document.querySelector('home-assistant');
+      if (haEl && haEl.hass && haEl.hass.callWS) {
+        tries.push("home-assistant.hass");
+        return Promise.resolve(haEl.hass);
+      }
+    } catch(e) { /* ignore */ }
+
+    // Method 3: look for any element with hass property
+    try {
+      var allEls = top.document.querySelectorAll('*');
+      for (var i = 0; i < allEls.length; i++) {
+        if (allEls[i].hass && allEls[i].hass.callWS) {
+          tries.push("*[hass]");
+          return Promise.resolve(allEls[i].hass);
+        }
+      }
+    } catch(e) { /* ignore */ }
+
+    return Promise.reject(new Error("hass not found, tried: " + tries.join(",")));
+  }
+
+  function callHA(msg) {
+    return getHass().then(function(hass) {
+      if (hass.callWS) {
+        return hass.callWS(msg).then(function(r) {
+          return r.result || r;
+        });
+      }
+      var ws = hass.connection || hass.conn;
+      if (ws) {
+        if (ws.call) return ws.call(msg).then(function(r) { return r.result || r; });
+        if (ws.sendMessagePromise) return ws.sendMessagePromise(msg).then(function(r) { return r.result || r; });
+      }
+      throw new Error("hass has no callWS or connection");
+    });
+  }
+
+  function getDashboards() {
+    return callHA({type: "get_panels"}).then(function(panels) {
+      if (!panels || typeof panels !== "object") return [];
+      var result = [];
+      for (var key in panels) {
+        var p = panels[key];
+        if (p && p.component_name === "lovelace" && p.url_path) {
+          result.push({
+            url_path: p.url_path,
+            title: p.title || p.url_path
+          });
+        }
+      }
+      return result;
+    });
+  }
+
+  var allModules = [];
+  var favorites = [];
+  var recent = [];
+  var customModules = [];
+  var activeTag = null;
+  var currentView = "all";
+  var currentSort = "name";
+
+  function getToken() {
+    try {
+      var top = window.top;
+      if (top.hassConnection && top.hassConnection.then) {
+        return top.hassConnection.then(function(h) {
+          return h.auth.data ? h.auth.data.access_token : (h.auth.token || "");
+        });
+      }
+      var haEl = top.document.querySelector("home-assistant");
+      if (haEl && haEl.hass && haEl.hass.auth) {
+        var auth = haEl.hass.auth;
+        return Promise.resolve(auth.data ? auth.data.access_token : (auth.token || ""));
+      }
+      return getHass().then(function(h) {
+        return h.auth.data ? h.auth.data.access_token : (h.auth.token || "");
+      });
+    } catch(e) {
+      return Promise.resolve("");
+    }
+  }
+
+  function loadUserData() {
+    return getToken().then(function(token) {
+      return fetch("/api/html_card_store/user_data", {
+        headers: {"Authorization": "Bearer " + token}
+      });
+    }).then(function(r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    }).then(function(data) {
+      if (!data || typeof data !== "object") return;
+      if (Array.isArray(data.custom_modules)) customModules = data.custom_modules;
+      if (Array.isArray(data.favorites)) favorites = data.favorites;
+      if (Array.isArray(data.recent)) recent = data.recent;
+
+      if (customModules.length === 0 || favorites.length === 0 || recent.length === 0) {
+        var oldMods = localStorage.getItem("hcp_custom_v5");
+        var oldFav = localStorage.getItem("hcp_fav_v5");
+        var oldRec = localStorage.getItem("hcp_recent_v5");
+        if (customModules.length === 0 && oldMods) {
+          try { var p = JSON.parse(oldMods); if (Array.isArray(p)) customModules = p; } catch(e) {}
+        }
+        if (favorites.length === 0 && oldFav) {
+          try { var p = JSON.parse(oldFav); if (Array.isArray(p)) favorites = p; } catch(e) {}
+        }
+        if (recent.length === 0 && oldRec) {
+          try { var p = JSON.parse(oldRec); if (Array.isArray(p)) recent = p; } catch(e) {}
+        }
+        if (customModules.length > 0 || favorites.length > 0 || recent.length > 0) {
+          syncUserData();
+          localStorage.removeItem("hcp_custom_v5");
+          localStorage.removeItem("hcp_fav_v5");
+          localStorage.removeItem("hcp_recent_v5");
+        }
+      }
+      renderTagFilters();
+      renderStats();
+      renderModules();
+    }).catch(function() {
+      try {
+        var oldMods = localStorage.getItem("hcp_custom_v5");
+        if (oldMods) { var p = JSON.parse(oldMods); if (Array.isArray(p)) customModules = p; }
+        var oldFav = localStorage.getItem("hcp_fav_v5");
+        if (oldFav) { var p = JSON.parse(oldFav); if (Array.isArray(p)) favorites = p; }
+        var oldRec = localStorage.getItem("hcp_recent_v5");
+        if (oldRec) { var p = JSON.parse(oldRec); if (Array.isArray(p)) recent = p; }
+      } catch(e) {}
+    });
+  }
+
+  function syncUserData() {
+    var payload = JSON.stringify({
+      custom_modules: customModules,
+      favorites: favorites,
+      recent: recent
+    });
+    getToken().then(function(token) {
+      fetch("/api/html_card_store/user_data", {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + token,
+          "Content-Type": "application/json"
+        },
+        body: payload
+      }).catch(function() {});
+    });
+  }
+
+  function escapeHtml(str) {
+    if (!str) return "";
+    var div = document.createElement("div");
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
+  function getModuleKey(mod) {
+    return String(mod.id || mod.name || ("mod_" + allModules.indexOf(mod)));
+  }
+
+  function init() {
+    loadModules();
+    loadUserData();
+    setupEventListeners();
+    renderStats();
+    _applyLang();
+    // 切回标签页时静默刷新
+    document.addEventListener('visibilitychange', function() {
+      if (!document.hidden) { refreshModulesSilently(); }
+    });
+    // 双击弹窗标题放大
+    document.addEventListener('dblclick', function(e) {
+      var h = e.target.closest('.modal-header');
+      if (h) toggleModalSize(h);
+    });
+  }
+
+  function loadModules() {
+    var container = document.getElementById("modulesContainer");
+
+    // 尝试从 localStorage 读取缓存
+    try {
+      var cached = localStorage.getItem(STORE_CACHE_KEY);
+      if (cached) {
+        var parsed = JSON.parse(cached);
+        if (parsed && parsed.data && Array.isArray(parsed.data) && (Date.now() - parsed.time) < STORE_CACHE_TTL) {
+          allModules = parsed.data;
+          renderTagFilters();
+          renderStats();
+          renderModules();
+          // 后台静默刷新
+          setTimeout(function() { refreshModulesSilently(); }, 100);
+          return;
+        }
+      }
+    } catch(e) {}
+
+    container.innerHTML = '<div class="loading"><div class="spinner"></div><div data-i18n="loading">' + _t('loading') + '</div></div>';
+
+    fetchWithFallback(getStoreUrls())
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        allModules = data;
+        // 写入缓存
+        try { localStorage.setItem(STORE_CACHE_KEY, JSON.stringify({data: data, time: Date.now()})); } catch(e) {}
+        renderTagFilters();
+        renderStats();
+        renderModules();
+      })
+      .catch(function(e) {
+        // 取不到网络就看看有没有过期缓存
+        try {
+          var cached = localStorage.getItem(STORE_CACHE_KEY);
+          if (cached) {
+            var parsed = JSON.parse(cached);
+            if (parsed && parsed.data && Array.isArray(parsed.data)) {
+              allModules = parsed.data;
+              renderTagFilters();
+              renderStats();
+              renderModules();
+              return;
+            }
+          }
+        } catch(e2) {}
+        container.innerHTML = '<div class="error">加载失败: ' + e.message + '</div>';
+      });
+  }
+
+  function refreshModulesSilently() {
+    fetchWithFallback(getStoreUrls())
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        allModules = data;
+        try { localStorage.setItem(STORE_CACHE_KEY, JSON.stringify({data: data, time: Date.now()})); } catch(e) {}
+        renderTagFilters();
+        renderStats();
+        renderModules();
+      }).catch(function() {});
+  }
+
+  function saveAll() {
+    syncUserData();
+  }
+
+  function renderStats() {
+    document.getElementById("favCount").textContent = favorites.length;
+    document.getElementById("recentCount").textContent = recent.length;
+    document.getElementById("customCount").textContent = customModules.length;
+    
+    var container = document.getElementById("statsBar");
+    container.innerHTML = 
+      '<div class="stat"><div class="stat-num">' + allModules.length + '</div><div class="stat-label">' + _t('statStore') + '</div></div>' +
+      '<div class="stat"><div class="stat-num">' + customModules.length + '</div><div class="stat-label">' + _t('statCustom') + '</div></div>' +
+      '<div class="stat"><div class="stat-num">' + favorites.length + '</div><div class="stat-label">' + _t('statFav') + '</div></div>';
+  }
+
+  function renderTagFilters() {
+    var tagsSet = {};
+    allModules.forEach(function(m) { (m.tags || []).forEach(function(t) { tagsSet[t] = true; }); });
+    customModules.forEach(function(m) { (m.tags || []).forEach(function(t) { tagsSet[t] = true; }); });
+    var tags = Object.keys(tagsSet).sort();
+    var container = document.getElementById("tagFilters");
+    var html = '<button class="tag' + (!activeTag ? ' active' : '') + '" data-tag="">' + _t('allTag') + '</button>';
+    tags.forEach(function(tag) { 
+      html += '<button class="tag' + (activeTag === tag ? ' active' : '') + '" data-tag="' + tag + '">' + tag + '</button>'; 
+    });
+    container.innerHTML = html;
+  }
+
+  function isFavorited(mod) {
+    return favorites.indexOf(getModuleKey(mod)) > -1;
+  }
+
+  function isRecent(mod) {
+    return recent.indexOf(getModuleKey(mod)) > -1;
+  }
+
+  function getModules() {
+    var mods;
+    
+    if (currentView === "favorites") {
+      mods = allModules.filter(function(m) { return isFavorited(m); });
+    } else if (currentView === "recent") {
+      mods = allModules.filter(function(m) { return isRecent(m); });
+    } else if (currentView === "custom") {
+      mods = customModules.slice();
+    } else {
+      mods = [...allModules, ...customModules];
+    }
+
+    var search = document.getElementById("searchInput").value.toLowerCase();
+    if (search) {
+      mods = mods.filter(function(m) {
+        return (m.name || "").toLowerCase().indexOf(search) > -1 ||
+          (m.description || "").toLowerCase().indexOf(search) > -1;
+      });
+    }
+
+    if (activeTag) {
+      mods = mods.filter(function(m) { return (m.tags || []).indexOf(activeTag) > -1; });
+    }
+
+    mods.sort(function(a, b) {
+      if (currentSort === "name") {
+        return (a.name || "").localeCompare(b.name || "");
+      } else if (currentSort === "date") {
+        var dateA = a.createdAt || a.updatedAt || 0;
+        var dateB = b.createdAt || b.updatedAt || 0;
+        return dateB - dateA;
+      } else if (currentSort === "author") {
+        return ((a.creator || a.author) || "").localeCompare((b.creator || b.author) || "");
+      }
+      return 0;
+    });
+
+    return mods;
+  }
+
+  function renderModules() {
+    var container = document.getElementById("modulesContainer");
+    var mods = getModules();
+
+    if (mods.length === 0) {
+      var msg = currentView === "favorites" ? _t('emptyFav') : 
+                currentView === "recent" ? _t('emptyRecent') :
+                currentView === "custom" ? _t('emptyCustom') : _t('emptyNone');
+      container.innerHTML = '<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><div>' + msg + '</div></div>';
+      return;
+    }
+
+    var html = "";
+    mods.forEach(function(mod) {
+      var key = getModuleKey(mod);
+      var fav = isFavorited(mod);
+      var rec = isRecent(mod);
+      var isCustom = currentView === "custom" || mod._isCustom;
+      
+      html += '<div class="module-card' + (fav ? ' is-favorite' : '') + (isCustom ? ' is-custom' : '') + '" data-key="' + key + '">';
+      html += '<div class="img-container">';
+      if (mod.image) {
+        html += '<img class="module-img" src="' + mod.image + '" alt="' + (mod.name || "") + '" onerror="var img=this;if(img.src.indexOf(\'cdn.\')>0){var local=img.src.replace(/https.*html-card-pro@main\//,\'/local/html_card_store/\');fetch(local).then(function(r){if(r.ok){img.src=local;return;}});}" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"/>';
+        html += '<div class="placeholder" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>';
+      } else {
+        html += '<div class="placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>';
+      }
+      html += '<button class="fav-btn' + (fav ? ' is-favorite' : '') + '" data-key="' + key + '" title="收藏">';
+      html += '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+      html += '</button>';
+      if (rec) html += '<div class="badge">' + _t('badgeRecent') + '</div>';
+      if (isCustom) html += '<div class="badge custom">' + _t('badgeCustom') + '</div>';
+      html += '</div>';
+      
+      html += '<div class="module-content">';
+      html += '<div class="module-header"><h3 class="module-title">' + (mod.name || _t('unknownName')) + '</h3><span class="module-version">v' + (mod.version || "1.0") + '</span></div>';
+      html += '<p class="module-desc">' + ((mod.description || "").substring(0, 60)) + '...</p>';
+      html += '<div class="module-meta">';
+      html += '<span class="module-author">@' + (mod.creator || mod.author || (isCustom ? _t('authorMe') : _t('authorUnknown'))) + '</span>';
+      html += '<div class="module-tags">';
+      (mod.tags || []).slice(0, 2).forEach(function(t) { html += '<span class="module-tag">' + t + '</span>'; });
+      html += '</div></div>';
+      html += '<div class="module-actions">';
+      if (isCustom) {
+        html += '<button class="btn action-btn" data-action="edit" data-key="' + key + '">' + _t('btnEdit') + '</button>';
+        html += '<button class="btn action-btn primary" data-action="install" data-key="' + key + '">' + _t('btnInstall') + '</button>';
+        html += '<button class="btn action-btn" data-action="copy" data-key="' + key + '">' + _t('btnCopy') + '</button>';
+      } else {
+        if (mod.link) {
+          html += '<button class="btn action-btn" data-action="source" data-key="' + key + '">' + _t('btnSource') + '</button>';
+        }
+        html += '<button class="btn action-btn primary" data-action="install" data-key="' + key + '">' + _t('btnInstall') + '</button>';
+        html += '<button class="btn action-btn" data-action="copy" data-key="' + key + '" style="flex:0.5;font-size:11px;">' + _t('btnCopy') + '</button>';
+      }
+      html += '</div></div></div>';
+    });
+    
+    container.innerHTML = html;
+    bindEvents();
+  }
+
+  function bindEvents() {
+    document.querySelectorAll(".fav-btn").forEach(function(btn) {
+      btn.onclick = function(e) {
+        e.stopPropagation();
+        toggleFavorite(btn.getAttribute("data-key"));
+      };
+    });
+
+    document.querySelectorAll(".action-btn").forEach(function(btn) {
+      btn.onclick = function(e) {
+        e.stopPropagation();
+        var action = btn.getAttribute("data-action");
+        var key = btn.getAttribute("data-key");
+        if (action === "edit") showEditModal(key);
+        else if (action === "copy") copyModuleCode(key);
+        else if (action === "install") showInstallModule(key);
+        else if (action === "source") {
+          var mod = allModules.find(function(m) { return getModuleKey(m) === key; });
+          if (mod && mod.link) window.open(mod.link, "_blank");
+        }
+      };
+    });
+
+    document.querySelectorAll(".module-card").forEach(function(card) {
+      card.onclick = function(e) {
+        if (e.target.closest(".action-btn")) return;
+        showDetail(card.getAttribute("data-key"));
+      };
+    });
+  }
+
+  function toggleFavorite(key) {
+    var idx = favorites.indexOf(key);
+    if (idx > -1) {
+      favorites.splice(idx, 1);
+      showToast(_t('unfavorited'), "info");
+    } else {
+      favorites.push(key);
+      showToast(_t('favorited'), "success");
+    }
+    saveAll();
+    renderStats();
+    renderModules();
+  }
+
+  function findModule(key) {
+    var mod = allModules.find(function(m) { return getModuleKey(m) === key; });
+    if (mod) return mod;
+    return customModules.find(function(m) { return getModuleKey(m) === key; }) || null;
+  }
+
+  function getModuleContent(mod) {
+    if (mod.code || mod.content) {
+      return Promise.resolve(mod.code || mod.content);
+    }
+    if (mod.file) {
+      var filePath = mod.file;
+      return fetchWithFallback(getModUrls(filePath)).then(function(r) {
+        return r.text();
+      }).then(function(yaml) {
+        var lines = yaml.split('\n');
+        var start = -1;
+        for (var i = 0; i < lines.length; i++) {
+          if (/^content:\s*[|>]-?\s*$/.test(lines[i])) {
+            start = i + 1;
+            break;
+          }
+        }
+        if (start < 0) return '';
+        var contentLines = [];
+        var indent = null;
+        for (var j = start; j < lines.length; j++) {
+          var line = lines[j];
+          if (line.trim() === '') {
+            contentLines.push('');
+            continue;
+          }
+          var m = line.match(/^(\s+)/);
+          if (!m) break;
+          if (indent === null) indent = m[1].length;
+          contentLines.push(line.substring(indent));
+        }
+        return contentLines.join('\n');
+      });
+    }
+    return Promise.resolve("");
+  }
+
+  function copyModuleCode(key) {
+    var mod = findModule(key);
+    if (!mod) return;
+    
+    addToRecent(key);
+    
+    getModuleContent(mod).then(function(content) {
+      if (content) {
+        copyToClipboard(content);
+      }
+      renderModules();
+    });
+  }
+
+  function copyToClipboard(text) {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text);
+        showToast(_t('copied'), "success");
+        return;
+      }
+    } catch(e) {}
+    // 降级：临时 textarea 复制
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      ta.style.top = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast(_t('copied'), "success");
+    } catch(e) {
+      showToast(_t('copyFail'), "warning");
+    }
+  }
+
+  // ===== 导入到仪表盘 =====
+
+  function showInstallModule(key) {
+    var mod = findModule(key);
+    if (!mod) return;
+    addToRecent(key);
+    renderModules();
+
+    var modalId = "installModal_" + Date.now();
+    var html = '<div class="modal-overlay"><div class="modal" style="max-width:900px;">';
+    html += '<div class="modal-header"><div class="modal-header-left"><h2 class="modal-title">' + _t('importTitle') + ': ' + (mod.name || "") + '</h2></div><div class="modal-header-actions"><button class="modal-maximize" onclick="toggleModalSize(this)"><svg><use href="#ico-maximize"/></svg></button>';
+    html += '<button class="modal-close" id="' + modalId + '_close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></div>';
+    html += '<div class="modal-body" id="' + modalId + '_body"><div class="loading"><div class="spinner"></div><div>' + _t('loadingContent') + '</div></div></div></div></div>';
+
+    document.getElementById("modalContainer").innerHTML = html;
+    document.getElementById(modalId + "_close").onclick = closeModal;
+    document.querySelector("#modalContainer .modal-overlay").onclick = function(e) {
+      if (e.target.classList.contains("modal-overlay")) closeModal();
+    };
+
+    var body = document.getElementById(modalId + "_body");
+    var selectedDash = null;
+    var selectedViewIdx = -1;
+    var moduleCode = null;
+    var cachedConfig = null;
+
+    getModuleContent(mod).then(function(code) {
+      if (!code) {
+        body.innerHTML = '<div class="empty"><div>' + _t('noCode') + '</div></div>';
+        return;
+      }
+      moduleCode = code;
+
+      getDashboards().then(function(dashboards) {
+        if (!Array.isArray(dashboards) || dashboards.length === 0) {
+          body.innerHTML = '<div class="empty"><div>' + _t('noDashboards') + '</div></div>';
+          copyModuleCode(key);
+          return;
+        }
+
+        dashboards = dashboards.map(function(d) {
+          var up = d.url_path || d.path || d.id || "";
+          return {
+            urlPath: up,
+            title: d.title || d.name || d.url_path || up || _t('unnamed')
+          };
+        });
+
+        var fhtml = '<div style="display:flex;gap:16px;flex:1;min-height:0;">';
+
+        // 左侧面板（独立滚动）
+        fhtml += '<div style="flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;min-height:0;">';
+        fhtml += '<div style="overflow-y:auto;flex:1;padding:20px 10px 20px 0;">';
+        fhtml += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:14px 16px;background:rgba(0,0,0,0.015);border-radius:12px;border:1px solid var(--divider-color);">';
+        fhtml += '<svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="var(--primary-color)" opacity="0.1"/><path d="M14 26L10 20l4-6m12 12l4-6-4-6m-7-2l-4 12" stroke="var(--primary-color)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        fhtml += '<div style="min-width:0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">';
+        fhtml += '<span style="font-size:16px;font-weight:600;color:var(--primary-text-color);">' + (mod.name || "") + '</span>';
+        fhtml += '<span style="font-size:11px;padding:2px 8px;background:var(--primary-color);color:#fff;border-radius:8px;font-weight:600;">v' + (mod.version || "1.0") + '</span>';
+        fhtml += '<span style="font-size:12px;color:var(--primary-color);">@' + (mod.creator || mod.author || "") + '</span>';
+        fhtml += '</div>';
+        fhtml += '<div style="font-size:13px;color:var(--secondary-text-color);">' + (mod.description || _t('importTitle')) + '</div>';
+        fhtml += '<div style="margin-top:8px;display:flex;gap:4px;flex-wrap:wrap;">';
+        fhtml += '<span style="font-size:10px;padding:2px 8px;background:var(--primary-color);color:#fff;border-radius:6px;font-weight:500;">Realtime</span>';
+        fhtml += '<span style="font-size:10px;padding:2px 8px;background:var(--primary-color);color:#fff;border-radius:6px;font-weight:500;">HTML+CSS</span>';
+        if (mod.tags) mod.tags.forEach(function(t) { fhtml += '<span style="font-size:10px;padding:2px 8px;background:rgba(var(--rgb-primary-color),0.1);color:var(--primary-color);border-radius:6px;">' + t + '</span>'; });
+        fhtml += '</div></div></div>';
+        // 折叠面板1：HTML 内容（代码编辑器）
+        fhtml += '<div class="collapse-panel">';
+        fhtml += '<div class="collapse-header expanded" id="' + modalId + '_toggleCode">';
+        fhtml += '<div class="collapse-header-left">';
+        fhtml += '<svg class="collapse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>';
+        fhtml += '<span class="collapse-title">HTML ' + _t('codeLabel') + '</span></div>';
+        fhtml += '<button class="btn" id="' + modalId + '_expandCode" style="padding:4px 10px;font-size:11px;min-width:0;margin-right:6px;" title="' + _t('expandCode') + '">🔍 ' + _t('expandCode') + '</button>';
+        fhtml += '<span class="collapse-arrow expanded"></span></div>';
+        fhtml += '<div class="collapse-body expanded" id="' + modalId + '_bodyCode">';
+        fhtml += '<div class="collapse-content">';
+        fhtml += '<textarea class="form-textarea" id="' + modalId + '_code" style="min-height:200px;font-size:12px;font-family:Consolas,monospace;">' + escapeHtml(code) + '</textarea>';
+        fhtml += '<div style="margin-top:10px;display:flex;gap:8px;">';
+        fhtml += '<button class="btn" id="' + modalId + '_save" style="flex:1;justify-content:center;">' + _t('saveToCustom') + '</button>';
+        fhtml += '<button class="btn" id="' + modalId + '_copyCode" style="flex:0.5;justify-content:center;">' + _t('btnCopy') + '</button>';
+        fhtml += '</div></div></div></div>';
+
+        // 折叠面板2：选项（仅保留 html-pro-card 标准项）
+        fhtml += '<div class="collapse-panel">';
+        fhtml += '<div class="collapse-header" id="' + modalId + '_toggleOpts">';
+        fhtml += '<div class="collapse-header-left">';
+        fhtml += '<svg class="collapse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
+        fhtml += '<span class="collapse-title">' + _t('options') + '</span></div>';
+        fhtml += '<span class="collapse-arrow"></span></div>';
+        fhtml += '<div class="collapse-body" id="' + modalId + '_bodyOpts">';
+        fhtml += '<div class="collapse-content">';
+
+        // Pure HTML Mode（匹配 html-pro-card 的 disableParse）
+        fhtml += '<div class="option-row"><div><div class="option-label">' + _t('disableParse') + '</div><div class="option-desc">' + _t('disableParseDesc') + '</div></div>';
+        fhtml += '<label style="position:relative;display:inline-block;width:44px;height:24px;"><input type="checkbox" id="' + modalId + '_pureHtml" style="opacity:0;width:0;height:0;"><span class="switch-slider" style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--divider-color);border-radius:24px;transition:0.3s;"></span><span class="switch-knob" style="position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:0.3s;box-shadow:0 1px 3px rgba(0,0,0,0.2);"></span></label></div>';
+
+        // Ignore Line Breaks（匹配 html-pro-card 的 ignoreLineBreaks）
+        fhtml += '<div class="option-row"><div><div class="option-label">' + _t('ignoreLineBreaks') + '</div><div class="option-desc">' + _t('ignoreLineBreaksDesc') + '</div></div>';
+        fhtml += '<label style="position:relative;display:inline-block;width:44px;height:24px;"><input type="checkbox" id="' + modalId + '_ignoreBr" style="opacity:0;width:0;height:0;"><span class="switch-slider" style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--divider-color);border-radius:24px;transition:0.3s;"></span><span class="switch-knob" style="position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:0.3s;box-shadow:0 1px 3px rgba(0,0,0,0.2);"></span></label></div>';
+
+        // Update Interval（匹配 html-pro-card 的 updateInterval）
+        fhtml += '<div class="option-row"><div><div class="option-label">' + _t('updateInterval') + '</div><div class="option-desc">' + _t('intervalDesc') + '</div></div>';
+        fhtml += '<input type="text" class="form-input interval-input" id="' + modalId + '_interval" style="width:100px;text-align:center;padding:8px 12px;height:36px;border:1px solid var(--divider-color);border-radius:8px;font-size:14px;font-weight:500;" value="0"/></div>';
+
+        fhtml += '</div></div></div>';
+
+        // 折叠面板3：外部脚本（加载 JS 库）
+        fhtml += '<div class="collapse-panel">';
+        fhtml += '<div class="collapse-header" id="' + modalId + '_toggleScr">';
+        fhtml += '<div class="collapse-header-left">';
+        fhtml += '<svg class="collapse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>';
+        fhtml += '<span class="collapse-title">' + _t('extScripts') + '</span></div>';
+        fhtml += '<span class="collapse-arrow"></span></div>';
+        fhtml += '<div class="collapse-body" id="' + modalId + '_bodyScr">';
+        fhtml += '<div class="collapse-content">';
+        fhtml += '<div style="margin-bottom:8px;display:flex;gap:8px;">';
+        fhtml += '<input type="text" class="form-input" id="' + modalId + '_scrInput" style="flex:1;" placeholder="https://cdn.jsdelivr.net/npm/..."/>';
+        fhtml += '<button class="btn" id="' + modalId + '_addScript" style="flex-shrink:0;">+' + _t('addScript') + '</button></div>';
+        fhtml += '<div id="' + modalId + '_scrList"></div>';
+        fhtml += '<div style="margin-top:6px;font-size:11px;color:var(--secondary-text-color);padding:8px 12px;background:rgba(0,0,0,0.02);border-radius:8px;">' + _t('scriptHint') + '</div>';
+        fhtml += '</div></div></div>';
+
+        // 折叠面板4：导入设置
+        fhtml += '<div class="collapse-panel">';
+        fhtml += '<div class="collapse-header expanded" id="' + modalId + '_toggleImp">';
+        fhtml += '<div class="collapse-header-left">';
+        fhtml += '<svg class="collapse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+        fhtml += '<span class="collapse-title">' + _t('installToDash') + '</span></div>';
+        fhtml += '<span class="collapse-arrow expanded"></span></div>';
+        fhtml += '<div class="collapse-body expanded" id="' + modalId + '_bodyImp">';
+        fhtml += '<div class="collapse-content">';
+        fhtml += '<div class="option-row"><div><div class="option-label">' + _t('selectDash') + '</div><div class="option-desc">' + _t('scanDesc') + '</div></div>';
+        fhtml += '<select class="form-input" id="' + modalId + '_dash" style="width:200px;">';
+        dashboards.forEach(function(d, i) { fhtml += '<option value="' + i + '">' + d.title + '</option>'; });
+        fhtml += '</select></div>';
+        fhtml += '<div class="option-row"><div><div class="option-label">' + _t('selectView') + '</div><div class="option-desc">' + _t('importTitle') + '</div></div>';
+        fhtml += '<select class="form-input" id="' + modalId + '_view" style="width:200px;"><option value="-1">' + _t('loadingViews') + '</option></select></div>';
+        fhtml += '<div class="option-row"><div><div class="option-label">' + _t('cardName') + '</div><div class="option-desc">' + _t('preview') + '</div></div>';
+        fhtml += '<input type="text" class="form-input" id="' + modalId + '_name" style="width:200px;" value="' + (mod.name || "") + '"/></div>';
+        fhtml += '<div class="option-row" style="border:none;padding-top:8px;">';
+        fhtml += '<button class="btn primary" id="' + modalId + '_confirm" style="width:100%;justify-content:center;padding:12px;">📥 ' + _t('confirmInstall') + '</button>';
+        fhtml += '</div></div></div></div>';
+
+        fhtml += '</div></div>'; // 左侧面板结束
+
+        // 右侧：预览（独立滚动）
+        fhtml += '<div class="import-preview-panel" style="width:380px;flex-shrink:0;overflow-y:auto;padding-left:8px;">';
+        fhtml += '<div style="padding:12px;background:rgba(0,0,0,0.015);border-radius:12px;border:1px solid var(--divider-color);">';
+        fhtml += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">';
+        fhtml += '<span style="font-size:13px;font-weight:600;color:var(--primary-text-color);">' + _t('previewLabel') + '</span>';
+        fhtml += '<button id="' + modalId + '_expandPreview" style="background:none;border:none;cursor:pointer;font-size:11px;color:var(--primary-color);padding:2px 6px;">' + _t('expand') + '</button></div>';
+        fhtml += '<iframe id="' + modalId + '_preview" style="width:100%;height:450px;border:none;display:block;border-radius:8px;" sandbox="allow-scripts"></iframe>';
+        fhtml += '<div style="margin-top:10px;"><button class="btn" id="' + modalId + '_cancel" style="width:100%;justify-content:center;">' + _t('cancel') + '</button></div>';
+        fhtml += '</div></div></div>'; // 右栏 + flex 容器结束
+
+        body.innerHTML = fhtml;
+
+        var previewFrame = document.getElementById(modalId + '_preview');
+        if (previewFrame) {
+          previewFrame.srcdoc = '<html><head><style>body{margin:0;padding:16px;font-family:Roboto,sans-serif;background:#fff;color:#333;}</style></head><body>' + code + '</body></html>';
+        }
+
+        // 延迟升级代码编辑器，避免影响 iframe 渲染
+        setTimeout(function() { upgradeToCodeEditor(modalId + '_code'); }, 200);
+
+        var expandBtn = document.getElementById(modalId + '_expandPreview');
+        var previewFrame = document.getElementById(modalId + '_preview');
+        var expandedState = false;
+        if (expandBtn && previewFrame) {
+          expandBtn.onclick = function() {
+            expandedState = !expandedState;
+            if (expandedState) {
+              previewFrame.style.height = '500px';
+              expandBtn.textContent = _t('collapse');
+            } else {
+              previewFrame.style.height = '300px';
+              expandBtn.textContent = _t('expand');
+            }
+          };
+        }
+
+        // 折叠面板切换
+        function setupCollapseToggle(toggleId, bodyId) {
+          var toggle = document.getElementById(toggleId);
+          var body = document.getElementById(bodyId);
+          if (!toggle || !body) return;
+          toggle.onclick = function() {
+            var expanded = body.classList.toggle('expanded');
+            toggle.classList.toggle('expanded');
+            toggle.querySelector('.collapse-arrow').classList.toggle('expanded');
+          };
+        }
+        setupCollapseToggle(modalId + '_toggleCode', modalId + '_bodyCode');
+        setupCollapseToggle(modalId + '_toggleOpts', modalId + '_bodyOpts');
+        setupCollapseToggle(modalId + '_toggleScr', modalId + '_bodyScr');
+        setupCollapseToggle(modalId + '_toggleImp', modalId + '_bodyImp');
+
+        document.getElementById(modalId + '_expandCode').onclick = function() {
+          openCodeEditor(modalId + '_code');
+        };
+
+        // 外部脚本管理
+        var _scripts = [];
+        function renderScrList() {
+          var el = document.getElementById(modalId + '_scrList');
+          if (!el) return;
+          if (!_scripts.length) { el.innerHTML = ''; return; }
+          var h = '';
+          _scripts.forEach(function(url, i) {
+            h += '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--divider-color);">';
+            h += '<span style="flex:1;font-size:12px;color:var(--primary-text-color);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + url + '</span>';
+            h += '<button class="btn" id="' + modalId + '_scrDel' + i + '" style="padding:4px 10px;font-size:11px;min-width:0;">✕</button></div>';
+          });
+          el.innerHTML = h;
+          _scripts.forEach(function(url, i) {
+            var del = document.getElementById(modalId + '_scrDel' + i);
+            if (del) del.onclick = function() { _scripts.splice(i, 1); renderScrList(); };
+          });
+        }
+        var addBtn = document.getElementById(modalId + '_addScript');
+        if (addBtn) {
+          addBtn.onclick = function() {
+            var input = document.getElementById(modalId + '_scrInput');
+            if (!input || !input.value.trim()) return;
+            _scripts.push(input.value.trim());
+            input.value = '';
+            renderScrList();
+          };
+        }
+
+        // 复制代码按钮
+        var copyBtn = document.getElementById(modalId + '_copyCode');
+        if (copyBtn) {
+          copyBtn.onclick = function() {
+            var code = document.getElementById(modalId + "_code").value;
+            copyToClipboard(code);
+          };
+        }
+
+        document.getElementById(modalId + "_cancel").onclick = closeModal;
+
+        document.getElementById(modalId + "_save").onclick = function() {
+          var editedCode = document.getElementById(modalId + "_code").value.trim();
+          if (!editedCode) { showToast(_t('codeEmpty'), "error"); return; }
+          var newId = "custom_" + Date.now();
+          customModules.push({
+            id: newId,
+            name: (mod.name || _t('badgeCustom') + " " + _t('unnamed')) + " (副本)",
+            description: mod.description || "",
+            tags: (mod.tags || []).slice(),
+            image: mod.image || "",
+            code: editedCode,
+            content: editedCode,
+            _isCustom: true,
+            version: "1.0",
+            creator: _t('authorMe'),
+            author: _t('authorMe')
+          });
+          saveAll();
+          closeModal();
+          showToast(_t('savedToCustom'), "success");
+          setTimeout(function() { showDetail(newId); }, 300);
+        };
+
+        function loadViews() {
+          var idx = parseInt(document.getElementById(modalId + "_dash").value);
+          var dash = dashboards[idx];
+          if (!dash) return;
+          selectedDash = dash;
+
+          var viewSelect = document.getElementById(modalId + "_view");
+          viewSelect.innerHTML = '<option value="-1">' + _t('loadingViews') + '</option>';
+
+          var msg = {type: "lovelace/config"};
+          if (dash.urlPath && dash.urlPath !== "lovelace") msg.url_path = dash.urlPath;
+
+          callHA(msg).then(function(r) {
+            var cfg = r.result || r;
+            cachedConfig = cfg;
+            if (cfg && cfg.views) {
+              viewSelect.innerHTML = "";
+              cfg.views.forEach(function(v, vi) {
+                var opt = document.createElement("option");
+                opt.value = vi;
+                opt.textContent = v.title || v.path || "视图" + (vi + 1);
+                viewSelect.appendChild(opt);
+              });
+              selectedViewIdx = 0;
+              viewSelect.value = "0";
+              viewSelect.onchange = function() { selectedViewIdx = parseInt(this.value); };
+            } else {
+              viewSelect.innerHTML = '<option value="-1">' + _t('noViews') + '</option>';
+            }
+          }).catch(function() {
+            viewSelect.innerHTML = '<option value="-1">' + _t('loadFailed') + '</option>';
+            copyModuleCode(key);
+          });
+        }
+
+        document.getElementById(modalId + "_dash").onchange = loadViews;
+        loadViews();
+
+        document.getElementById(modalId + "_confirm").onclick = function() {
+          if (selectedViewIdx < 0) { showToast(_t('selectViewFirst'), "error"); return; }
+
+          var cardName = document.getElementById(modalId + "_name").value.trim() || mod.name || _t('unnamed');
+
+          if (!cachedConfig || !cachedConfig.views) {
+            showToast(_t('configFailed'), "error");
+            return;
+          }
+
+          var cfg = JSON.parse(JSON.stringify(cachedConfig));
+          var urlPath = selectedDash.urlPath || "";
+          var targetView = cfg.views[selectedViewIdx];
+
+          if (targetView.sections && targetView.sections.length > 0) {
+            if (!targetView.sections[0].cards) targetView.sections[0].cards = [];
+            targetView.sections[0].cards.push({
+              type: "custom:html-pro-card",
+              title: cardName,
+              do_not_parse: true,
+              ignore_line_breaks: true,
+              content: document.getElementById(modalId + "_code").value.trim() || moduleCode
+            });
+          } else {
+            targetView.cards = targetView.cards || [];
+            targetView.cards.push({
+              type: "custom:html-pro-card",
+              title: cardName,
+              do_not_parse: true,
+              ignore_line_breaks: true,
+              content: document.getElementById(modalId + "_code").value.trim() || moduleCode
+            });
+          }
+
+          var saveMsg = {type: "lovelace/config/save", config: cfg};
+          if (urlPath && urlPath !== "lovelace") saveMsg.url_path = urlPath;
+
+          this.textContent = _t('loading');
+          this.disabled = true;
+
+          callHA(saveMsg).then(function() {
+            closeModal();
+            var viewTitle = cachedConfig.views[selectedViewIdx].title || _t('unnamed') + (selectedViewIdx + 1);
+            showToast(_t('importedTo') + ' ' + (selectedDash.title || selectedDash.urlPath) + ' > ' + viewTitle, "success");
+            var viewPath = cachedConfig.views[selectedViewIdx].path || selectedViewIdx;
+            var navPath = "/" + (urlPath || "lovelace") + "/" + viewPath;
+            setTimeout(function() { window.top.location.href = navPath; }, 800);
+          }).catch(function() {
+            showToast(_t('importFailed'), "error");
+            document.getElementById(modalId + "_confirm").textContent = _t('confirmInstall');
+            document.getElementById(modalId + "_confirm").disabled = false;
+          });
+        };
+      }).catch(function(e) {
+        console.error("[card-store] getDashboards failed:", e);
+        body.innerHTML = '<div class="empty"><div>' + _t('configFailed') + '</div><div style="font-size:12px;color:var(--error-color);margin-top:8px">' + (e && e.message ? e.message : JSON.stringify(e)) + '</div></div>';
+        copyModuleCode(key);
+      });
+    }).catch(function() {
+      body.innerHTML = '<div class="empty"><div>' + _t('loadFailed') + '</div></div>';
+    });
+  }
+
+  function addToRecent(key) {
+    var idx = recent.indexOf(key);
+    if (idx > -1) recent.splice(idx, 1);
+    recent.unshift(key);
+    if (recent.length > 20) recent.pop();
+    saveAll();
+  }
+
+  function showNewModal() {
+    var html = '<div class="modal-overlay"><div class="modal">';
+    html += '<div class="modal-header"><div class="modal-header-left"><h2 class="modal-title">' + _t('newTitle') + '</h2></div><div class="modal-header-actions"><button class="modal-maximize" onclick="toggleModalSize(this)"><svg><use href="#ico-maximize"/></svg></button>';
+    html += '<button class="modal-close" id="closeBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></div>';
+    html += '<div class="modal-body"><div class="modal-body-inner"><form id="newForm">';
+    html += '<div class="form-group"><label class="form-label">' + _t('modName') + '</label>';
+    html += '<input type="text" class="form-input" id="modName" required placeholder="' + _t('modNamePH') + '"/></div>';
+    html += '<div class="form-group"><label class="form-label">' + _t('modDesc') + '</label>';
+    html += '<input type="text" class="form-input" id="modDesc" placeholder="' + _t('modDescPH') + '"/></div>';
+    html += '<div class="form-group"><label class="form-label">' + _t('modTags') + '</label>';
+    html += '<input type="text" class="form-input" id="modTags" placeholder="' + _t('modTagsPH') + '"/></div>';
+    html += '<div class="form-group"><label class="form-label">' + _t('modImage') + '</label>';
+    html += '<input type="text" class="form-input" id="modImage" placeholder="https://..."/></div>';
+    html += '<div class="form-group"><label class="form-label">' + _t('modCode') + '</label>';
+    html += '<textarea class="form-textarea" id="modCode" required placeholder="' + _t('modCodePH') + '"></textarea></div>';
+    html += '<div class="modal-actions">';
+    html += '<button type="button" class="btn" id="cancelBtn">' + _t('cancel') + '</button>';
+    html += '<button type="submit" class="btn primary">' + _t('save') + '</button>';
+    html += '</div></form></div></div></div></div>';
+    
+    document.getElementById("modalContainer").innerHTML = html;
+    upgradeToCodeEditor('modCode');
+
+    document.getElementById("closeBtn").onclick = closeModal;
+    document.getElementById("cancelBtn").onclick = closeModal;
+    document.getElementById("newForm").onsubmit = function(e) {
+      e.preventDefault();
+      saveNewModule();
+    };
+  }
+
+  function saveNewModule() {
+    var name = document.getElementById("modName").value.trim();
+    var desc = document.getElementById("modDesc").value.trim();
+    var tags = document.getElementById("modTags").value.split(",").map(function(t) { return t.trim(); }).filter(function(t) { return t; });
+    var image = document.getElementById("modImage").value.trim();
+    var code = document.getElementById("modCode").value.trim();
+    
+    if (!name || !code) {
+      showToast(_t('codeEmpty'), "error");
+      return;
+    }
+    
+    var newMod = {
+      id: "custom_" + Date.now(),
+      name: name,
+      description: desc,
+      tags: tags,
+      image: image,
+      code: code,
+      content: code,
+      creator: _t('authorMe'),
+      author: _t('authorMe'),
+      version: "1.0",
+      _isCustom: true
+    };
+    
+    customModules.push(newMod);
+    saveAll();
+    renderTagFilters();
+    renderStats();
+    renderModules();
+    closeModal();
+    showToast(_t('saving'), "success");
+    setTimeout(function() { showDetail(newMod.id); }, 300);
+  }
+
+  function showEditModal(key) {
+    var mod = customModules.find(function(m) { return getModuleKey(m) === key; });
+    if (!mod) return;
+    
+    var html = '<div class="modal-overlay"><div class="modal">';
+    html += '<div class="modal-header"><div class="modal-header-left"><h2 class="modal-title">' + _t('btnEdit') + ' ' + _t('badgeCustom') + '</h2></div><div class="modal-header-actions"><button class="modal-maximize" onclick="toggleModalSize(this)"><svg><use href="#ico-maximize"/></svg></button>';
+    html += '<button class="modal-close" id="closeBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></div>';
+    html += '<div class="modal-body"><div class="modal-body-inner"><form id="editForm">';
+    html += '<div class="form-group"><label class="form-label">' + _t('modName') + '</label>';
+    html += '<input type="text" class="form-input" id="modName" required value="' + (mod.name || "") + '"/></div>';
+    html += '<div class="form-group"><label class="form-label">' + _t('modDesc') + '</label>';
+    html += '<input type="text" class="form-input" id="modDesc" value="' + (mod.description || "") + '"/></div>';
+    html += '<div class="form-group"><label class="form-label">' + _t('modTags') + '</label>';
+    html += '<input type="text" class="form-input" id="modTags" value="' + ((mod.tags || []).join(", ")) + '"/></div>';
+    html += '<div class="form-group"><label class="form-label">' + _t('modImage') + '</label>';
+    html += '<input type="text" class="form-input" id="modImage" value="' + (mod.image || "") + '"/></div>';
+    html += '<div class="form-group"><label class="form-label">' + _t('modCode') + '</label>';
+    html += '<textarea class="form-textarea" id="modCode" required>' + (mod.code || mod.content || "") + '</textarea></div>';
+    html += '<div class="modal-actions">';
+    html += '<button type="button" class="btn danger" id="deleteBtn">删除</button>';
+    html += '<button type="button" class="btn" id="cancelBtn">' + _t('cancel') + '</button>';
+    html += '<button type="submit" class="btn primary">' + _t('save') + '</button>';
+    html += '</div></form></div></div></div></div>';
+    
+    document.getElementById("modalContainer").innerHTML = html;
+    upgradeToCodeEditor('modCode');
+
+    document.getElementById("closeBtn").onclick = closeModal;
+    document.getElementById("cancelBtn").onclick = closeModal;
+    document.getElementById("deleteBtn").onclick = function() {
+      if (confirm("确定要删除这个模块吗?")) {
+        customModules = customModules.filter(function(m) { return getModuleKey(m) !== key; });
+        favorites = favorites.filter(function(f) { return f !== key; });
+        recent = recent.filter(function(r) { return r !== key; });
+        saveAll();
+        renderTagFilters();
+        renderStats();
+        renderModules();
+        closeModal();
+        showToast("已删除", "info");
+      }
+    };
+    document.getElementById("editForm").onsubmit = function(e) {
+      e.preventDefault();
+      saveEditModule(key);
+    };
+  }
+
+  function saveEditModule(key) {
+    var mod = customModules.find(function(m) { return getModuleKey(m) === key; });
+    if (!mod) return;
+    
+    mod.name = document.getElementById("modName").value.trim();
+    mod.description = document.getElementById("modDesc").value.trim();
+    mod.tags = document.getElementById("modTags").value.split(",").map(function(t) { return t.trim(); }).filter(function(t) { return t; });
+    mod.image = document.getElementById("modImage").value.trim();
+    mod.code = document.getElementById("modCode").value.trim();
+    mod.content = mod.code;
+    
+    saveAll();
+    renderTagFilters();
+    renderModules();
+    closeModal();
+    showToast("已更新!", "success");
+  }
+
+  function showDetail(key) {
+    var mod = findModule(key);
+    if (!mod) return;
+    
+    var fav = isFavorited(mod);
+    var isCustom = mod._isCustom;
+    var html = '<div class="modal-overlay"><div class="modal" style="max-width:900px;">';
+    html += '<div class="modal-header"><div class="modal-header-left"><h2 class="modal-title">' + (mod.name || "") + '</h2></div><div class="modal-header-actions"><button class="modal-maximize" onclick="toggleModalSize(this)"><svg><use href="#ico-maximize"/></svg></button>';
+    html += '<button class="modal-close" id="closeBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></div>';
+    html += '<div class="modal-body"><div style="display:flex;gap:16px;flex:1;min-height:0;">';
+    html += '<div style="flex:1;min-width:0;display:flex;flex-direction:column;">';
+    if (mod.image) html += '<img class="modal-img" src="' + mod.image + '"/>';
+    html += '<div class="modal-meta">';
+    html += '<span class="modal-meta-item">v' + (mod.version || "1.0") + '</span>';
+    html += '<span class="modal-meta-item">@' + (mod.creator || mod.author || (isCustom ? _t('authorMe') : _t('authorUnknown'))) + '</span>';
+    (mod.tags || []).forEach(function(t) { html += '<span class="modal-meta-item">' + t + '</span>'; });
+    html += '</div>';
+    html += '<p class="modal-desc">' + (mod.description || "") + '</p>';
+    html += '<button class="btn" id="detailShowCodeBtn" style="width:100%;justify-content:center;margin:8px 0;">🔍 ' + _t('showCode') + '</button>';
+    html += '<div id="detailCodeSection" style="display:none;margin-bottom:8px;">';
+    html += '<textarea id="detailCodeTextarea" style="min-height:250px;width:100%;font-size:12px;font-family:Consolas,monospace;padding:12px;border:1px solid var(--divider-color);border-radius:8px;resize:vertical;"></textarea>';
+    html += '<button class="btn primary" id="detailEditCodeBtn" style="width:100%;justify-content:center;margin-top:8px;">✏️ ' + _t('expandCode') + '</button>';
+    html += '</div>';
+    html += '<div class="modal-actions" style="margin-top:auto;">';
+    html += '<button class="btn' + (fav ? '' : ' primary') + '" id="favBtn">' + (fav ? _t('favOn') : _t('favOff')) + '</button>';
+    if (isCustom) {
+      html += '<button class="btn" id="copyBtn">' + _t('btnCopy') + '</button>';
+      html += '<button class="btn primary" id="installBtn">' + _t('installToDash') + '</button>';
+    } else {
+      if (mod.link) html += '<button class="btn" id="sourceBtn">' + _t('viewSource') + '</button>';
+      html += '<button class="btn" id="copyBtn">' + _t('btnCopy') + '</button>';
+      html += '<button class="btn primary" id="installBtn">' + _t('installToDash') + '</button>';
+    }
+    html += '</div></div>';
+    html += '<div class="detail-preview-panel" style="width:420px;flex-shrink:0;">';
+    html += '<div style="padding:12px;background:rgba(0,0,0,0.02);border-radius:10px;border:1px solid var(--divider-color);">';
+    html += '<div style="font-size:14px;font-weight:600;color:var(--primary-text-color);margin-bottom:8px;">' + (mod.name || "") + '</div>';
+    html += '<div style="border:1px solid var(--divider-color);border-radius:8px;overflow:hidden;">';
+    html += '<div style="padding:6px 10px;font-size:11px;color:var(--secondary-text-color);background:rgba(0,0,0,0.02);border-bottom:1px solid var(--divider-color);display:flex;align-items:center;justify-content:space-between;">';
+    html += '<span>' + _t('preview') + '</span>';
+    html += '<button id="detailExpandPreview" style="background:none;border:none;cursor:pointer;font-size:11px;color:var(--primary-color);padding:2px 6px;">' + _t('expand') + '</button></div>';
+    html += '<iframe id="detailPreview" style="width:100%;height:400px;border:none;display:block;" sandbox="allow-scripts"></iframe>';
+    html += '</div></div></div></div></div></div></div>';
+    
+    document.getElementById("modalContainer").innerHTML = html;
+
+    document.getElementById("closeBtn").onclick = closeModal;
+    document.getElementById("favBtn").onclick = function() { toggleFavorite(key); closeModal(); };
+    if (document.getElementById("sourceBtn")) {
+      document.getElementById("sourceBtn").onclick = function() { window.open(mod.link, "_blank"); };
+    }
+    if (document.getElementById("copyBtn")) {
+      document.getElementById("copyBtn").onclick = function() { copyModuleCode(key); };
+    }
+    if (document.getElementById("installBtn")) {
+      document.getElementById("installBtn").onclick = function() { closeModal(); showInstallModule(key); };
+    }
+
+    document.getElementById("detailShowCodeBtn").onclick = function() {
+      var section = document.getElementById("detailCodeSection");
+      var isHidden = section.style.display === 'none';
+      section.style.display = isHidden ? 'block' : 'none';
+      this.innerHTML = isHidden ? '🙈 ' + _t('hideCode') : '🔍 ' + _t('showCode');
+    };
+    document.getElementById("detailEditCodeBtn").onclick = function() {
+      openCodeEditor("detailCodeTextarea");
+    };
+
+    getModuleContent(mod).then(function(content) {
+      var el = document.getElementById("detailPreview");
+      if (el) el.srcdoc = '<html><head><style>body{margin:0;padding:16px;font-family:Roboto,sans-serif;background:#fff;color:#333;}</style></head><body>' + (content || "") + '</body></html>';
+      var ta = document.getElementById("detailCodeTextarea");
+      if (ta) {
+        ta.value = content || "";
+        upgradeToCodeEditor("detailCodeTextarea");
+      }
+    });
+
+    var detailExpand = document.getElementById("detailExpandPreview");
+    var detailBody = document.querySelector("#modalContainer .modal-body > div");
+    if (detailExpand && detailBody) {
+      var detailExpanded = false;
+      var detailLeft = detailBody.firstElementChild;
+      var detailRight = detailBody.lastElementChild;
+      detailExpand.onclick = function() {
+        detailExpanded = !detailExpanded;
+        if (detailExpanded) {
+          detailLeft.style.display = 'none';
+          detailRight.style.width = '100%';
+          var pf = document.getElementById("detailPreview");
+          if (pf) pf.style.height = '500px';
+          detailExpand.textContent = _t('collapse');
+        } else {
+          detailLeft.style.display = '';
+          detailRight.style.width = '420px';
+          var pf = document.getElementById("detailPreview");
+          if (pf) pf.style.height = '400px';
+          detailExpand.textContent = _t('expand');
+        }
+      };
+    }
+  }
+
+  function closeModal() {
+    document.getElementById("modalContainer").innerHTML = "";
+  }
+
+  function openCodeEditor(textareaId) {
+    var ta = document.getElementById(textareaId);
+    if (!ta) return;
+    var editorModalId = "codeEd_" + Date.now();
+    var h = '<div class="modal-overlay"><div class="modal" style="max-width:900px;min-height:500px;">';
+    h += '<div class="modal-header"><div class="modal-header-left"><h2 class="modal-title">' + _t('editCode') + '</h2></div><div class="modal-header-actions">';
+    h += '<button class="modal-maximize" onclick="toggleModalSize(this)"><svg><use href="#ico-maximize"/></svg></button>';
+    h += '<button class="modal-close" id="' + editorModalId + '_close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></div>';
+    h += '<div class="modal-body" style="display:flex;flex-direction:column;overflow:hidden;padding:16px;">';
+    h += '<textarea id="' + editorModalId + '_code" style="flex:1;min-height:300px;width:100%;font-size:13px;font-family:Consolas,monospace;padding:14px;border:1px solid var(--divider-color);border-radius:10px;resize:none;">' + escapeHtml(ta.value) + '</textarea>';
+    h += '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;">';
+    h += '<button class="btn" id="' + editorModalId + '_cancel">' + _t('cancel') + '</button>';
+    h += '<button class="btn primary" id="' + editorModalId + '_ok">' + _t('save') + '</button>';
+    h += '</div></div></div></div>';
+    document.getElementById("modalContainer").innerHTML = h;
+    document.getElementById(editorModalId + '_close').onclick = closeModal;
+    document.getElementById(editorModalId + '_cancel').onclick = closeModal;
+    document.querySelector("#modalContainer .modal-overlay").onclick = function(e) {
+      if (e.target.classList.contains("modal-overlay")) closeModal();
+    };
+    document.getElementById(editorModalId + '_ok').onclick = function() {
+      ta.value = document.getElementById(editorModalId + '_code').value;
+      ta.dispatchEvent(new Event('input', {bubbles: true}));
+      closeModal();
+    };
+    upgradeToCodeEditor(editorModalId + '_code');
+  }
+
+  function showToast(msg, type) {
+    var toast = document.getElementById("toast");
+    toast.textContent = msg;
+    toast.className = "toast " + type;
+    toast.classList.add("show");
+    setTimeout(function() { toast.classList.remove("show"); }, 3000);
+  }
+
+  // ===== 分两步导入：①选仪表盘 ②扫描卡片 =====
+
+  function renderDashList(dashboards) {
+    var html = '<div style="margin-bottom:12px;color:var(--secondary-text-color);font-size:13px;">' + _t('scanDesc') + '</div>';
+    html += '<div style="max-height:350px;overflow-y:auto;margin-bottom:16px;">';
+    dashboards.forEach(function(d, idx) {
+      html += '<label style="display:flex;align-items:center;padding:12px 14px;border:1px solid var(--divider-color);border-radius:10px;margin-bottom:8px;cursor:pointer;">';
+      html += '<input type="checkbox" id="dash_' + idx + '" checked style="width:18px;height:18px;margin-right:12px;accent-color:var(--primary-color);">';
+      html += '<div><div style="font-size:14px;font-weight:600;color:var(--primary-text-color);">' + d.title + '</div>';
+      html += '<div style="font-size:11px;color:var(--secondary-text-color);">' + d.urlPath + '</div></div>';
+      html += '</label>';
+    });
+    html += '</div>';
+    html += '<div class="modal-actions">';
+    html += '<button class="btn" id="scanCheckAll" style="flex:1;">' + _t('selectAll') + '</button>';
+    html += '<button class="btn primary" id="scanStartBtn" style="flex:1;">' + _t('scanStart') + '</button>';
+    html += '</div>';
+    return html;
+  }
+
+  function bindDashListEvents() {
+    var dashboards = window._scanDashboards;
+    document.getElementById("scanCheckAll").onclick = function() {
+      var allChecked = true;
+      dashboards.forEach(function(d, idx) {
+        var cb = document.getElementById("dash_" + idx);
+        if (cb && !cb.checked) allChecked = false;
+      });
+      dashboards.forEach(function(d, idx) {
+        var cb = document.getElementById("dash_" + idx);
+        if (cb) cb.checked = !allChecked;
+      });
+    };
+    document.getElementById("scanStartBtn").onclick = function() {
+      var selected = [];
+      dashboards.forEach(function(d, idx) {
+        var cb = document.getElementById("dash_" + idx);
+        if (cb && cb.checked) selected.push(d);
+      });
+      if (selected.length === 0) { showToast(_t('selectDashFirst'), "error"); return; }
+      scanSelectedDashboards(selected);
+    };
+  }
+
+  function showScanModal() {
+    document.getElementById("scanModal").style.display = "flex";
+    showDashboardList();
+  }
+
+  function installHPC() {
+    showToast(_t('checkingHPC'), "info");
+
+    callHA({type: "lovelace/resources"}).then(function(resources) {
+      var hasHPC = resources && resources.some(function(r) {
+        return r.url && (r.url.indexOf("html-pro-card") >= 0 || r.url.indexOf("html-card-pro") >= 0);
+      });
+
+      if (hasHPC) {
+        showToast(_t('hpcInstalled'), "success");
+        return;
+      }
+
+      showToast(_t('downloading'), "info");
+
+      getToken().then(function(token) {
+        return fetch("/api/html_card_store/install_hpc", {
+          method: "POST",
+          headers: {"Authorization": "Bearer " + token}
+        });
+      }).then(function(r) {
+        if (!r.ok) throw new Error(_t('hpcFailed'));
+        return r.json();
+      }).then(function(result) {
+        if (result.error) throw new Error(result.error);
+        showToast(_t('registering'), "info");
+
+        return callHA({
+          type: "lovelace/resource/create",
+          url: "/local/html-card-pro.js",
+          resource_type: "module"
+        });
+      }).then(function() {
+        showToast(_t('hpcSuccess'), "success");
+        setTimeout(function() { location.reload(); }, 1500);
+      }).catch(function(e) {
+        showToast(_t('hpcFailed') + ': ' + (e.message || _t('authorUnknown')), "error");
+      });
+    }).catch(function() {
+      showToast(_t('checkFailed'), "error");
+    });
+  }
+
+  function closeScanModal() {
+    document.getElementById("scanModal").style.display = "none";
+  }
+
+  function showDashboardList() {
+    var body = document.getElementById("scanBody");
+    body.innerHTML = '<div class="loading"><div class="spinner"></div><div>' + _t('loading') + '</div></div>';
+
+    getDashboards().then(function(dashboards) {
+      if (!Array.isArray(dashboards) || dashboards.length === 0) {
+        body.innerHTML = '<div class="empty"><div>' + _t('noDashboards') + '</div></div>';
+        return;
+      }
+
+      var list = dashboards.map(function(d) {
+        var up = d.url_path || d.path || d.id || "";
+        return {
+          urlPath: up,
+          title: d.title || d.name || d.url_path || up || _t('unnamed'),
+          checked: true
+        };
+      });
+
+      window._scanDashboards = list;
+      body.innerHTML = renderDashList(list);
+      bindDashListEvents();
+
+    }, function(e) {
+      console.error("[card-store] showDashboardList getDashboards failed:", e);
+      body.innerHTML = '<div class="empty"><div>' + _t('configFailed') + '</div><div style="font-size:12px;color:var(--error-color);margin-top:8px">' + (e && e.message ? e.message : JSON.stringify(e)) + '</div></div>';
+    });
+  }
+  window._showDashList = showDashboardList;
+
+  function scanSelectedDashboards(selected) {
+    var body = document.getElementById("scanBody");
+    body.innerHTML = '<div class="loading"><div class="spinner"></div><div>' + _t('scanning') + ' ' + selected.length + ' ' + _t('scanCard') + '...</div></div>';
+
+    var allCards = [];
+    var scanned = 0;
+    var total = selected.length;
+
+    function scanOne(dash) {
+      var msg = {type: "lovelace/config"};
+      if (dash.urlPath && dash.urlPath !== "lovelace") msg.url_path = dash.urlPath;
+
+      callHA(msg).then(function(result) {
+        scanned++;
+        var config = result.result || result;
+        if (config && config.views) {
+          config.views.forEach(function(view) {
+            var viewTitle = view.title || view.path || "视图";
+            (view.cards || []).forEach(function(card, ci) {
+              if (card.type && card.type.indexOf("html-pro-card") > -1 && card.content) {
+                allCards.push({
+                  name: card.title || card.alias || (viewTitle + " 卡片" + (ci + 1)),
+                  dashboard: dash.title,
+                  view: viewTitle,
+                  code: card.content
+                });
+              }
+            });
+          });
+        }
+        if (scanned >= total) showScanResults(body, allCards);
+      }).catch(function() {
+        scanned++;
+        if (scanned >= total) showScanResults(body, allCards);
+      });
+    }
+
+    selected.forEach(function(d) { scanOne(d); });
+
+    setTimeout(function() {
+      if (scanned < total) { scanned = total; showScanResults(body, allCards); }
+    }, 5000);
+  }
+
+  function showScanResults(body, allCards) {
+    if (allCards.length === 0) {
+      body.innerHTML = '<div class="empty"><div>' + _t('scanNone') + '</div><div style="font-size:12px;margin-top:8px;color:var(--secondary-text-color);"><a href="#" onclick="window._showDashList();return false;">← ' + _t('selectDash') + '</a></div></div>';
+      return;
+    }
+
+    var html = '<div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">';
+    html += '<span style="color:var(--secondary-text-color);font-size:13px;">' + _t('scanDone') + ' ' + allCards.length + ' ' + _t('scanCard') + '</span>';
+    html += '<div style="display:flex;gap:8px;align-items:center;">';
+    html += '<label style="font-size:12px;display:flex;align-items:center;gap:4px;cursor:pointer;color:var(--primary-text-color);"><input type="checkbox" id="scanSelectAll" checked style="accent-color:var(--primary-color);"> ' + _t('selectAll') + '</label>';
+    html += '<button class="btn primary" id="scanBatchImport" style="padding:6px 14px;font-size:12px;min-width:0;">📥 ' + _t('batchImport') + '</button>';
+    html += '<a href="#" onclick="window._showDashList();return false;" style="color:var(--primary-color);font-size:12px;">← ' + _t('selectDash') + '</a>';
+    html += '</div></div>';
+    html += '<div style="max-height:450px;overflow-y:auto;">';
+
+    allCards.forEach(function(c, idx) {
+      html += '<div class="scan-card"><div class="sc-content" style="display:flex;align-items:center;gap:10px;">';
+      html += '<input type="checkbox" id="scanCb_' + idx + '" checked style="flex-shrink:0;accent-color:var(--primary-color);width:16px;height:16px;cursor:pointer;" onclick="event.stopPropagation();">';
+      html += '<div style="flex:1;min-width:0;cursor:pointer;" onclick="window._importScannedCard(' + idx + ')">';
+      html += '<div class="sc-name">' + c.name + '</div>';
+      html += '<div class="sc-path">📁 ' + c.dashboard + ' > ' + c.view + '</div>';
+      html += '<span class="sc-badge html">✅ html-pro-card</span>';
+      html += '</div></div></div>';
+    });
+
+    html += '</div>';
+    body.innerHTML = html;
+    window._scannedCards = allCards;
+
+    document.getElementById("scanSelectAll").onclick = function() {
+      var checked = this.checked;
+      allCards.forEach(function(c, i) {
+        var cb = document.getElementById("scanCb_" + i);
+        if (cb) cb.checked = checked;
+      });
+    };
+
+    document.getElementById("scanBatchImport").onclick = function() {
+      var count = 0;
+      var firstKey = null;
+      allCards.forEach(function(c, i) {
+        var cb = document.getElementById("scanCb_" + i);
+        if (!cb || !cb.checked) return;
+        count++;
+        var modKey = "custom_" + Date.now() + "_" + i;
+        if (!firstKey) firstKey = modKey;
+        customModules.push({
+          id: modKey,
+          name: c.name,
+          description: _t('importedTo') + ' ' + c.dashboard + ' > ' + c.view,
+          tags: [_t('importTitle')],
+          code: c.code,
+          content: c.code,
+          creator: _t('authorMe'),
+          author: _t('authorMe'),
+          version: "1.0",
+          _isCustom: true,
+          createdAt: Date.now()
+        });
+      });
+      if (count === 0) { showToast(_t('selectCardFirst'), "error"); return; }
+      saveAll();
+      renderTagFilters();
+      renderStats();
+      renderModules();
+      closeScanModal();
+      showToast(_t('batchImported') + ': ' + count + ' ' + _t('scanCard'), "success");
+      if (count === 1 && firstKey) {
+        setTimeout(function() { showDetail(firstKey); }, 300);
+      }
+    };
+
+    window._importScannedCard = function(idx) {
+      var c = window._scannedCards[idx];
+      if (!c) return;
+      var modKey = "custom_" + Date.now();
+      customModules.push({
+        id: modKey,
+        name: c.name,
+        description: _t('importedTo') + ' ' + c.dashboard + ' > ' + c.view,
+        tags: [_t('importTitle')],
+        code: c.code,
+        content: c.code,
+        creator: _t('authorMe'),
+        author: _t('authorMe'),
+        version: "1.0",
+        _isCustom: true,
+        createdAt: Date.now()
+      });
+      saveAll();
+      renderTagFilters();
+      renderStats();
+      renderModules();
+      closeScanModal();
+      showToast(_t('savedToCustom') + ': ' + c.name, "success");
+      setTimeout(function() { showDetail(modKey); }, 300);
+    };
+  }
+
+  function setupEventListeners() {
+    document.getElementById("searchInput").oninput = renderModules;
+    document.getElementById("refreshBtn").onclick = loadModules;
+    document.getElementById("newModuleBtn").onclick = showNewModal;
+    document.getElementById("scanBtn").onclick = showScanModal;
+    document.getElementById("installHpcBtn").onclick = installHPC;
+    document.getElementById("closeScanBtn").onclick = closeScanModal;
+
+    document.getElementById("sortSelect").onchange = function(e) { currentSort = e.target.value; renderModules(); };
+    
+    document.getElementById("tagFilters").onclick = function(e) {
+      if (e.target.classList.contains("tag")) {
+        activeTag = e.target.getAttribute("data-tag") || null;
+        renderTagFilters();
+        renderModules();
+      }
+    };
+    
+    document.querySelectorAll(".tab").forEach(function(tab) {
+      tab.onclick = function() {
+        document.querySelectorAll(".tab").forEach(function(t) { t.classList.remove("active"); });
+        tab.classList.add("active");
+        currentView = tab.getAttribute("data-view");
+        renderModules();
+      };
+    });
+
+    // 点击模态框背景关闭
+    document.getElementById("scanModal").onclick = function(e) {
+      if (e.target === this) closeScanModal();
+    };
+  }
+
+  init();
+})();
+</script>

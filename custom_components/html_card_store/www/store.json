@@ -1,0 +1,112 @@
+[
+  {
+    "id": 18,
+    "name": "洗衣机带动画效果 仪表盘卡片",
+    "version": "1.0",
+    "creator": "stsy713",
+    "description": "",
+    "tags": ["Style"],
+    "image": "/local/html_card_store/images/18.png",
+    "link": "https://github.com/ha-china/html-card-pro/discussions/18",
+    "file": "mods/18-module-18.yaml"
+  },
+  {
+    "id": 17,
+    "name": "空气质量监测仪 仪表盘卡片 / Air Quality Monitor Dashboard Card",
+    "version": "1.0",
+    "creator": "fenglibo51",
+    "description": "",
+    "tags": ["Style"],
+    "image": "/local/html_card_store/images/17.png",
+    "link": "https://github.com/ha-china/html-card-pro/discussions/17",
+    "file": "mods/17-air-quality-monitor-dashboard-card.yaml"
+  },
+  {
+    "id": 16,
+    "name": "自适应电池状态监控系统 / Adaptive Battery Monitoring System",
+    "version": "1.0",
+    "creator": "fenglibo51",
+    "description": "",
+    "tags": ["Style"],
+    "image": "/local/html_card_store/images/16.png",
+    "link": "https://github.com/ha-china/html-card-pro/discussions/16",
+    "file": "mods/16-adaptive-battery-monitoring-system.yaml"
+  },
+  {
+    "id": 13,
+    "name": "Claw Assistant Dashboard Config Panel / Claw Assistant 仪表盘配置面板",
+    "version": "1.2.0",
+    "creator": "C3H3-AI",
+    "description": "",
+    "tags": ["Integration"],
+    "image": "/local/html_card_store/images/13.png",
+    "link": "https://github.com/ha-china/html-card-pro/discussions/13",
+    "file": "mods/13-claw-assistant-dashboard-config-panel-claw-assistant.yaml"
+  },
+  {
+    "id": 12,
+    "name": "空调卡片",
+    "version": "1.0",
+    "creator": "klhd2023",
+    "description": "",
+    "tags": [],
+    "image": "/local/html_card_store/images/12.png",
+    "link": "https://github.com/ha-china/html-card-pro/discussions/12",
+    "file": "mods/12-module-12.yaml"
+  },
+  {
+    "id": 11,
+    "name": "Minecraft 风格的 Home Assistant 平板中控仪表盘",
+    "version": "1.0",
+    "creator": "JochenZhou",
+    "description": "",
+    "tags": [],
+    "image": "/local/html_card_store/images/11.png",
+    "link": "https://github.com/ha-china/html-card-pro/discussions/11",
+    "file": "mods/11-minecraft-home-assistant.yaml"
+  },
+  {
+    "id": 10,
+    "name": "群晖 NAS 状态监控面板 / Synology NAS Status Panel",
+    "version": "1.0",
+    "creator": "fenglibo51",
+    "description": "",
+    "tags": ["Style"],
+    "image": "/local/html_card_store/images/10.png",
+    "link": "https://github.com/ha-china/html-card-pro/discussions/10",
+    "file": "mods/10-nas-synology-nas-status-panel.yaml"
+  },
+  {
+    "id": 9,
+    "name": "极简 Nest 风格的空调控制面板/minimalist Nest-inspired climate control dashboard",
+    "version": "1.0",
+    "creator": "fenglibo51",
+    "description": "",
+    "tags": ["Style"],
+    "image": "/local/html_card_store/images/9.png",
+    "link": "https://github.com/ha-china/html-card-pro/discussions/9",
+    "file": "mods/9-nest-minimalist-nest-inspired-climate-control-dashboard.yaml"
+  },
+  {
+    "id": 8,
+    "name": "Digital Clock",
+    "version": "1.0",
+    "creator": "knoop7",
+    "description": "This module provides a Digital Clock for HTML Pro Card. A beautiful gradient clock with monospace font that updates every second.",
+    "tags": ["Style"],
+    "image": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23667eea'/%3E%3Cstop offset='100%25' style='stop-color:%237649b1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='200' fill='url(%23g)'/%3E%3Ctext x='200' y='120' font-family='monospace' font-size='48' fill='white' text-anchor='middle' dominant-baseline='middle'%3E12:34:56%3C/text%3E%3C/svg%3E",
+    "link": "https://github.com/ha-china/html-card-pro/discussions/8",
+    "file": "mods/8-digital-clock.yaml"
+  },
+  {
+    "id": 7,
+    "name": "Apple TV Remote",
+    "version": "1.0",
+    "creator": "knoop7",
+    "description": "This module provides an Apple TV Remote for HTML Pro Card. With exquisite UI design and GSAP physics animations, it delivers the ultimate remote control experience.",
+    "tags": ["Appliance"],
+    "image": "/local/html_card_store/images/7.png",
+    "link": "https://github.com/ha-china/html-card-pro/discussions/7",
+    "file": "mods/7-apple-tv-remote.yaml"
+  }
+]

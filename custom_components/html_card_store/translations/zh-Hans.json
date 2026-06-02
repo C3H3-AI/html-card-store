@@ -1,0 +1,17 @@
+{
+  "config": {
+    "abort": {
+      "single_instance_allowed": "只能添加一个 HTML Card Store 实例"
+    },
+    "step": {
+      "user": {
+        "title": "HTML Card Store",
+        "description": "将在侧边栏创建「Html Pro卡片商店」面板，用于浏览、收藏和导入 html-pro-card 模块。",
+        "data": {
+          "title": "侧边栏名称",
+          "url_path": "URL路径"
+        }
+      }
+    }
+  }
+}
