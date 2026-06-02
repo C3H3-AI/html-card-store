@@ -3,3 +3,7 @@ __pycache__/
 *.pyo
 .DS_Store
 *.zip
+
+# 商店资源 - 用户从 CDN 获取，无需跟随集成安装
+custom_components/html_card_store/www/images/
+custom_components/html_card_store/www/mods/
