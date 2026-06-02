@@ -463,8 +463,15 @@
 .modal-meta-item { font-size: 12px; color: var(--secondary-text-color); background: var(--secondary-background-color); padding: 3px 10px; border-radius: 12px; border: 1px solid var(--divider-color); }
 .detail-left { display: flex; flex-direction: column; min-height: 0; overflow-y: auto; padding-right: 8px; }
 .detail-left .modal-img { flex-shrink: 0; }
-.detail-preview-panel { width: 420px; flex-shrink: 0; display: flex; flex-direction: column; overflow-y: auto; padding-right: 8px; }
+.detail-preview-panel { width: 420px; flex-shrink: 0; display: flex; flex-direction: column; overflow-y: auto; padding: 16px; border-left: 1px solid var(--divider-color); }
 .detail-preview-panel .preview-container { flex: 1; display: flex; flex-direction: column; }
+
+/* 安装弹窗两栏布局 */
+.install-layout { display: flex; gap: 16px; height: 100%; }
+.install-left { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
+.install-left-scroll { overflow-y: auto; flex: 1; padding: 20px 10px 20px 0; }
+.import-preview-panel { width: 380px; flex-shrink: 0; overflow-y: auto; padding-left: 8px; }
+
 .modal-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 .modal-actions .btn { justify-content: center; }
 
@@ -601,6 +608,46 @@ input:checked + .switch-slider + .switch-knob { transform: translateX(20px); }
   .fav-btn { width: 30px; height: 30px; top: 6px; right: 6px; }
   .fav-btn svg { width: 16px; height: 16px; }
   .badge { font-size: 10px; padding: 2px 6px; }
+
+  /* ===== 移动端弹窗（modal/dialog）优化 ===== */
+  .modal-overlay { padding: 0; }
+  .modal { min-width: unset; max-width: 100vw; max-height: 100vh; border-radius: 0; resize: none; }
+  .modal-body { flex-direction: column; }
+  .modal-header { padding: 12px 14px; }
+  .modal-title { font-size: 15px; }
+  .modal-maximize { display: none; }
+  .modal-body .modal-body-inner { padding: 14px; }
+  .modal-meta { gap: 6px; }
+  .modal-meta-item { font-size: 11px; }
+  .modal-desc-wrap { max-height: 150px; }
+  .modal-desc { padding: 10px; font-size: 13px; }
+
+  /* 安装弹窗两栏变单栏 */
+  .install-layout { flex-direction: column; }
+  .install-left-scroll { padding: 14px 10px; }
+  .import-preview-panel { width: 100% !important; padding-left: 0; }
+  .install-layout .import-preview-panel iframe { height: 280px; }
+
+  /* 详情弹窗预览面板 */
+  .detail-preview-panel { width: 100% !important; padding-right: 0; border-left: none; }
+  .detail-left { padding-right: 0; }
+
+  /* 折叠面板紧凑 */
+  .collapse-header { padding: 10px 12px; }
+  .collapse-title { font-size: 13px; }
+  .collapse-content { padding: 10px 12px; }
+
+  /* 选项行紧凑 */
+  .option-row { padding: 8px 0; }
+  .option-label { font-size: 13px; }
+
+  /* 表单紧凑 */
+  .form-group { margin-bottom: 12px; }
+  .form-input, .form-textarea { padding: 9px 12px; font-size: 13px; }
+
+  /* 代码预览区域自适应 */
+  .modal-body .prism-code-editor,
+  .modal-body .pce-fallback { max-height: 40vh; }
 }
 </style>
 
@@ -1490,11 +1537,11 @@ input:checked + .switch-slider + .switch-knob { transform: translateX(20px); }
           };
         });
 
-        var fhtml = '<div style="display:flex;gap:16px;height:100%;">';
+        var fhtml = '<div class="install-layout">';
 
         // 左侧面板（独立滚动）
-        fhtml += '<div style="flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;">';
-        fhtml += '<div style="overflow-y:auto;flex:1;padding:20px 10px 20px 0;">';
+        fhtml += '<div class="install-left">';
+        fhtml += '<div class="install-left-scroll">';
         fhtml += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:14px 16px;background:var(--secondary-background-color);border-radius:12px;border:1px solid var(--divider-color);">';
         fhtml += '<svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="var(--primary-color)" opacity="0.1"/><path d="M14 26L10 20l4-6m12 12l4-6-4-6m-7-2l-4 12" stroke="var(--primary-color)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
         fhtml += '<div style="min-width:0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">';
@@ -1589,7 +1636,7 @@ input:checked + .switch-slider + .switch-knob { transform: translateX(20px); }
         fhtml += '</div></div>'; // 左侧面板结束
 
         // 右侧：预览（独立滚动）
-        fhtml += '<div class="import-preview-panel" style="width:380px;flex-shrink:0;overflow-y:auto;padding-left:8px;">';
+        fhtml += '<div class="import-preview-panel">';
         fhtml += '<div style="padding:12px;background:var(--secondary-background-color);border-radius:12px;border:1px solid var(--divider-color);">';
         fhtml += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">';
         fhtml += '<span style="font-size:13px;font-weight:600;color:var(--primary-text-color);">' + _t('previewLabel') + '</span>';
@@ -1969,7 +2016,7 @@ input:checked + .switch-slider + .switch-knob { transform: translateX(20px); }
     html += '<div class="modal-header"><div class="modal-header-left"><h2 class="modal-title">' + (mod.name || "") + '</h2></div><div class="modal-header-actions"><button class="modal-maximize" onclick="toggleModalSize(this)"><svg><use href="#ico-maximize"/></svg></button>';
     html += '<button class="modal-close" id="closeBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></div>';
     // 主内容区：左栏（图+描述+按钮） | 右栏（预览）
-    html += '<div class="modal-body"><div class="detail-left" style="flex:1;min-width:0;padding:16px;display:flex;flex-direction:column;">';
+    html += '<div class="modal-body"><div class="detail-left" style="flex:1;padding:16px;">';
     // 左侧：效果图
     if (mod.image) html += '<img class="modal-img" src="' + mod.image + '" id="detailImg" onclick="zoomImage(this)"/>';
     // 元信息行
@@ -1993,7 +2040,7 @@ input:checked + .switch-slider + .switch-knob { transform: translateX(20px); }
     }
     html += '</div></div>';
     // 右侧：预览区
-    html += '<div class="detail-preview-panel" style="padding:16px;border-left:1px solid var(--divider-color);">';
+    html += '<div class="detail-preview-panel" style="padding:16px;">';
     html += '<div style="font-size:14px;font-weight:600;color:var(--primary-text-color);margin-bottom:10px;">' + _t('preview') + '</div>';
     html += '<div class="preview-container" style="border:1px solid var(--divider-color);border-radius:8px;overflow:hidden;display:flex;flex-direction:column;">';
     html += '<iframe id="detailPreview" style="width:100%;flex:1;min-height:300px;border:none;display:block;" sandbox="allow-scripts"></iframe>';
