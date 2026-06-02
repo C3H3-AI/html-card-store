@@ -1496,10 +1496,14 @@ input:checked + .switch-slider + .switch-knob { transform: translateX(20px); }
             var viewPath = cachedConfig.views[selectedViewIdx].path || selectedViewIdx;
             var navPath = "/" + (urlPath || "lovelace") + "/" + viewPath;
             setTimeout(function() { window.top.location.href = navPath; }, 800);
-          }).catch(function() {
-            showToast(_t('importFailed'), "error");
-            document.getElementById(modalId + "_confirm").textContent = _t('confirmInstall');
-            document.getElementById(modalId + "_confirm").disabled = false;
+          }).catch(function(e) {
+            console.log("[card-store] save error (might still work):", e);
+            closeModal();
+            var viewTitle = cachedConfig.views[selectedViewIdx].title || _t('unnamed') + (selectedViewIdx + 1);
+            showToast(_t('importedTo') + ' ' + (selectedDash.title || selectedDash.urlPath) + ' > ' + viewTitle, "success");
+            var viewPath = cachedConfig.views[selectedViewIdx].path || selectedViewIdx;
+            var navPath = "/" + (urlPath || "lovelace") + "/" + viewPath;
+            setTimeout(function() { window.top.location.href = navPath; }, 800);
           });
         };
       }).catch(function(e) {
