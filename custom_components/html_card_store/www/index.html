@@ -627,11 +627,12 @@ input:checked + .switch-slider + .switch-knob { transform: translateX(20px); }
   .install-layout { flex-direction: column; }
   .install-left-scroll { padding: 14px 10px; }
   .import-preview-panel { width: 100% !important; padding-left: 0; }
-  .install-layout .import-preview-panel iframe { height: 280px; }
+  .install-layout .import-preview-panel iframe { height: 200px !important; }
 
   /* 详情弹窗预览面板 */
   .detail-preview-panel { width: 100% !important; padding-right: 0; border-left: none; }
   .detail-left { padding-right: 0; }
+  .detail-preview-panel iframe { height: 200px !important; min-height: unset !important; }
 
   /* 折叠面板紧凑 */
   .collapse-header { padding: 10px 12px; }
