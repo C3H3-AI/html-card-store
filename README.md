@@ -53,7 +53,11 @@ html-card-pro 提供了优雅的代码编辑器、语法高亮和流畅的交互
 
 ## 截图
 
-（TODO：添加截图）
+![卡片商店](screenshots/9.png)
+![卡片详情](screenshots/10.png)
+![代码编辑](screenshots/11.png)
+![实时预览](screenshots/12.png)
+![安装配置](screenshots/13.png)
 
 ## 支持与反馈
 
