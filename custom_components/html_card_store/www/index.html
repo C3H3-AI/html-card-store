@@ -811,7 +811,7 @@ input:checked + .switch-slider + .switch-knob { transform: translateX(20px); }
   // localStorage 缓存（类似 html-pro-card 的做法）
   var STORE_CACHE_KEY = "hcs_store_cache";
   var STORE_CACHE_TTL = 3600000; // 1小时
-  var STORE_CACHE_VERSION = 2; // 缓存版本号，结构变化时递增
+  var STORE_CACHE_VERSION = 3; // 缓存版本号，结构变化时递增（v2→v3: 修复描述被YAML覆盖导致的空数据）
 
   function fetchWithFallback(urls) {
     function tryFetch(idx) {

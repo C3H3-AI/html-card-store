@@ -167,8 +167,26 @@ async def _async_deploy(hass: HomeAssistant, entry: ConfigEntry) -> None:
         if os.path.isfile(source_file):
             shutil.copy2(source_file, target_file)
             _LOGGER.info("Copied index.html to %s", target_file)
+
+        # 复制 store.json（供本地兜底 fetch）
+        store_source = os.path.join(www_path, "store.json")
+        store_target = os.path.join(target_dir, "store.json")
+        if os.path.isfile(store_source):
+            shutil.copy2(store_source, store_target)
+            _LOGGER.info("Copied store.json to %s", store_target)
+
+        # 复制 images 目录
+        images_source = os.path.join(www_path, "images")
+        images_target = os.path.join(target_dir, "images")
+        if os.path.isdir(images_source):
+            os.makedirs(images_target, exist_ok=True)
+            for fname in os.listdir(images_source):
+                fsrc = os.path.join(images_source, fname)
+                if os.path.isfile(fsrc):
+                    shutil.copy2(fsrc, os.path.join(images_target, fname))
+            _LOGGER.info("Copied images to %s", images_target)
     except Exception as ex:
-        _LOGGER.warning("Failed to copy index.html: %s", ex)
+        _LOGGER.warning("Failed to copy static files: %s", ex)
 
     dash_store = Store(hass, 1, "lovelace_dashboards")
     raw = await dash_store.async_load()
