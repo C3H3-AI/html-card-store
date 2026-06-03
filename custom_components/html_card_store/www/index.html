@@ -71,8 +71,9 @@
     expandCode: {zh:'展开编辑',en:'Expand editor'},
     showCode: {zh:'显示代码',en:'Show code'},
     hideCode: {zh:'隐藏代码',en:'Hide code'},
-    codeChangedApply: {zh:'编辑代码（修改后将自动应用到安装）',en:'Edit code (changes apply on import)'},
+    codeChangedApply: {zh:'编辑代码（修改后将自动应用到安装）',en:'Edit code (changes apply on install)'},
     preview: {zh:'👁 卡片效果预览',en:'👁 Card preview'},
+    noDescription: {zh:'暂无描述',en:'No description'},
     options: {zh:'选项',en:'Options'},
     disableParse: {zh:'Pure HTML Mode',en:'Pure HTML Mode'},
     disableParseDesc: {zh:'直接渲染 HTML，不解析 YAML 格式',en:'Render HTML directly without YAML parsing'},
@@ -917,7 +918,8 @@ input:checked + .switch-slider + .switch-knob { transform: translateX(20px); }
   function getStoreUrls() {
     return [
       CDN_BASE + "store.json",
-      GITHUB_RAW_BASE + "store.json"
+      GITHUB_RAW_BASE + "store.json",
+      "/local/html_card_store/store.json"
     ];
   }
   function getHass() {
@@ -1140,9 +1142,9 @@ input:checked + .switch-slider + .switch-knob { transform: translateX(20px); }
       return r.text();
     }).then(function(text) {
       var header = parseYamlHeader(text);
-      // store.json 字段优先，YAML 注释补充
-      if (!mod.description || !mod.description.trim()) {
-        mod.description = header.description || "";
+      // store.json 字段优先，仅当 YAML 注释有值时补充
+      if ((!mod.description || !mod.description.trim()) && header.description) {
+        mod.description = header.description;
       }
       if (!mod.image || mod.image.indexOf("/local/") === 0) {
         mod.image = header.image || mod.image;
@@ -2041,6 +2043,26 @@ input:checked + .switch-slider + .switch-knob { transform: translateX(20px); }
   function showDetail(key) {
     var mod = findModule(key);
     if (!mod) return;
+    
+    // 如果描述为空（YAML enrichment 可能误覆盖），尝试从 store.json 重新获取
+    if ((!mod.description || !mod.description.trim()) && !mod._isCustom) {
+      console.log('[showDetail] description empty for', mod.name, '(id=' + mod.id + '), refetching from store.json');
+      fetchWithFallback(getStoreUrls()).then(function(r){return r.json();}).then(function(data){
+        var fresh = (data||[]).find(function(m){return getModuleKey(m)===key;});
+        if (fresh && fresh.description) {
+          mod.description = fresh.description;
+          mod.image = fresh.image || mod.image;
+          showDetail(key);
+          return;
+        }
+        // 仍无描述，用默认文本后重试
+        mod.description = _t('noDescription') || '暂无描述';
+        showDetail(key);
+      }).catch(function(){
+        mod.description = _t('noDescription') || '暂无描述';
+        showDetail(key);
+      });
+    }
     
     var fav = isFavorited(mod);
     var isCustom = mod._isCustom;
