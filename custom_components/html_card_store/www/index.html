@@ -247,6 +247,21 @@
 
     root.style.setProperty('--app-header-background-color',
       readHAVar('--app-header-background-color') || primaryColor || '#455a64');
+
+    // 同步编辑器 shadow DOM 的 CSS 变量
+    var editorKeys = Object.keys(_editors);
+    for (var ei = 0; ei < editorKeys.length; ei++) {
+      var ed = _editors[editorKeys[ei]];
+      if (ed) {
+        for (var vn in vars) {
+          var vv = readHAVar(vn) || vars[vn];
+          ed.style.setProperty(vn, vv);
+        }
+        var rv = readHAVar('--rgb-primary-color') || hexToRgb(primaryColor || '#03a9f4') || '3, 169, 244';
+        ed.style.setProperty('--rgb-primary-color', rv);
+        try { if (typeof ed.updateTheme === 'function') ed.updateTheme(); } catch(e) {}
+      }
+    }
   }
 
   // 暴露共享函数到 window，让第二个 script IIFE 也能访问
@@ -843,17 +858,17 @@ input:checked + .switch-slider + .switch-knob { transform: translateX(20px); }
         if (typeof editor.updateTheme === 'function') {
           editor.updateTheme();
         }
-        // 在 shadow DOM 中注入主题覆盖样式
+        // 在 shadow DOM 中注入主题变量（仅用 var() 引用，不硬编码颜色）
         if (editor.shadowRoot) {
           var overrideStyle = document.createElement('style');
           overrideStyle.textContent = 
             'textarea, .prism-code-editor, .pce-fallback, pre, code {' +
-            '  background: var(--card-background-color, ' + (isD ? '#1c1c1c' : '#ffffff') + ') !important;' +
-            '  color: var(--primary-text-color, ' + (isD ? '#e1e1e1' : '#212121') + ') !important;' +
-            '  caret-color: var(--primary-text-color, ' + (isD ? '#e1e1e1' : '#212121') + ') !important;' +
+            '  background: var(--card-background-color) !important;' +
+            '  color: var(--primary-text-color) !important;' +
+            '  caret-color: var(--primary-text-color) !important;' +
             '}' +
             'textarea::placeholder {' +
-            '  color: var(--secondary-text-color, ' + (isD ? '#9e9e9e' : '#727272') + ') !important;' +
+            '  color: var(--secondary-text-color) !important;' +
             '  opacity: 0.6;' +
             '}';
           editor.shadowRoot.appendChild(overrideStyle);
