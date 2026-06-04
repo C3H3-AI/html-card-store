@@ -1,4 +1,4 @@
-<!-- v2.3.2 -->
+﻿<!-- v2.3.2 -->
 <script>
 (function() {
   // ===== I18N: Language detection + translations =====
@@ -73,7 +73,6 @@
     hideCode: {zh:'隐藏代码',en:'Hide code'},
     codeChangedApply: {zh:'编辑代码（修改后将自动应用到安装）',en:'Edit code (changes apply on install)'},
     preview: {zh:'👁 卡片效果预览',en:'👁 Card preview'},
-    noDescription: {zh:'暂无描述',en:'No description'},
     options: {zh:'选项',en:'Options'},
     disableParse: {zh:'Pure HTML Mode',en:'Pure HTML Mode'},
     disableParseDesc: {zh:'直接渲染 HTML，不解析 YAML 格式',en:'Render HTML directly without YAML parsing'},
@@ -136,6 +135,7 @@
   }
 
   var _themeSources = null;
+  var _editors = {}; // editor shadow DOM 注册表，供 upgradeToCodeEditor 使用
 
   function getParentRoots() {
     var p = window.top;
@@ -250,17 +250,19 @@
       readHAVar('--app-header-background-color') || primaryColor || '#455a64');
 
     // 同步编辑器 shadow DOM 的 CSS 变量
-    var editorKeys = Object.keys(_editors);
-    for (var ei = 0; ei < editorKeys.length; ei++) {
-      var ed = _editors[editorKeys[ei]];
-      if (ed) {
-        for (var vn in vars) {
-          var vv = readHAVar(vn) || vars[vn];
-          ed.style.setProperty(vn, vv);
+    if (_editors) {
+      var editorKeys = Object.keys(_editors);
+      for (var ei = 0; ei < editorKeys.length; ei++) {
+        var ed = _editors[editorKeys[ei]];
+        if (ed) {
+          for (var vn in vars) {
+            var vv = readHAVar(vn) || vars[vn];
+            ed.style.setProperty(vn, vv);
+          }
+          var rv = readHAVar('--rgb-primary-color') || hexToRgb(primaryColor || '#03a9f4') || '3, 169, 244';
+          ed.style.setProperty('--rgb-primary-color', rv);
+          try { if (typeof ed.updateTheme === 'function') ed.updateTheme(); } catch(e) {}
         }
-        var rv = readHAVar('--rgb-primary-color') || hexToRgb(primaryColor || '#03a9f4') || '3, 169, 244';
-        ed.style.setProperty('--rgb-primary-color', rv);
-        try { if (typeof ed.updateTheme === 'function') ed.updateTheme(); } catch(e) {}
       }
     }
   }
@@ -826,8 +828,6 @@ input:checked + .switch-slider + .switch-knob { transform: translateX(20px); }
     return tryFetch(0);
   }
 
-  var _editors = {};
-
   function upgradeToCodeEditor(id) {
     var ta = document.getElementById(id);
     if (!ta) return;
@@ -917,9 +917,8 @@ input:checked + .switch-slider + .switch-knob { transform: translateX(20px); }
 
   function getStoreUrls() {
     return [
-      CDN_BASE + "store.json",
       GITHUB_RAW_BASE + "store.json",
-      "/local/html_card_store/store.json"
+      CDN_BASE + "store.json"
     ];
   }
   function getHass() {
@@ -2043,26 +2042,6 @@ input:checked + .switch-slider + .switch-knob { transform: translateX(20px); }
   function showDetail(key) {
     var mod = findModule(key);
     if (!mod) return;
-    
-    // 如果描述为空（YAML enrichment 可能误覆盖），尝试从 store.json 重新获取
-    if ((!mod.description || !mod.description.trim()) && !mod._isCustom) {
-      console.log('[showDetail] description empty for', mod.name, '(id=' + mod.id + '), refetching from store.json');
-      fetchWithFallback(getStoreUrls()).then(function(r){return r.json();}).then(function(data){
-        var fresh = (data||[]).find(function(m){return getModuleKey(m)===key;});
-        if (fresh && fresh.description) {
-          mod.description = fresh.description;
-          mod.image = fresh.image || mod.image;
-          showDetail(key);
-          return;
-        }
-        // 仍无描述，用默认文本后重试
-        mod.description = _t('noDescription') || '暂无描述';
-        showDetail(key);
-      }).catch(function(){
-        mod.description = _t('noDescription') || '暂无描述';
-        showDetail(key);
-      });
-    }
     
     var fav = isFavorited(mod);
     var isCustom = mod._isCustom;
