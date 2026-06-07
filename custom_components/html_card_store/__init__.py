@@ -104,14 +104,23 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 
 async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Remove entry - final cleanup safety net."""
-    await _async_cleanup(hass, entry)
+    """Remove entry - final cleanup, including user data store."""
+    await _async_cleanup(hass, entry, remove_data=True)
 
 
-async def _async_cleanup(hass: HomeAssistant, entry: ConfigEntry) -> None:
+async def _async_cleanup(hass: HomeAssistant, entry: ConfigEntry, remove_data: bool = False) -> None:
     """Shared cleanup logic for unload and remove."""
     url_path = entry.data["dashboard_url"]
     store_id = url_path.replace("-", "_")
+
+    # 删除集成时清理用户数据（自建模块、收藏等）
+    if remove_data:
+        try:
+            user_store = Store(hass, 1, "html_card_store.user_data")
+            await user_store.async_remove()
+            _LOGGER.info("Removed user data store (custom modules, favorites)")
+        except Exception as ex:
+            _LOGGER.warning("Failed to remove user data store: %s", ex)
 
     try:
         if LOVELACE_DATA in hass.data and url_path in hass.data[LOVELACE_DATA].dashboards:
