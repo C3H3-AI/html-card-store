@@ -1,6 +1,7 @@
 {
     "domain": "html_card_store",
     "name": "HTML Card Store",
+    "authors": ["@C3H3-AI"],
     "codeowners": [
         "@C3H3-AI"
     ],
